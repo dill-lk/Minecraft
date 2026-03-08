@@ -1,5 +1,6 @@
 package net.mayaan.game;
 
+import net.mayaan.game.faction.Faction;
 import net.mayaan.game.story.StoryChapter;
 
 /**
@@ -13,7 +14,8 @@ import net.mayaan.game.story.StoryChapter;
  * <ol>
  *   <li>{@link MayaanBlocks} — Mayaan-specific blocks (Glyph Stone, Anima Crystal, etc.)</li>
  *   <li>{@link MayaanItems} — Mayaan-specific items and block items</li>
- *   <li>{@link net.mayaan.game.story.StoryChapter} — all story chapters and their goals</li>
+ *   <li>{@link StoryChapter} — all 14 story chapters and their goal lists</li>
+ *   <li>{@link Faction} — all four surviving factions with standing thresholds</li>
  * </ol>
  *
  * <h2>The story of Mayaan</h2>
@@ -39,6 +41,12 @@ import net.mayaan.game.story.StoryChapter;
  * {@link net.mayaan.game.story.StoryManager}. New players spawn on the Isle of First Light
  * and receive the Stone Shard via {@link net.mayaan.game.story.StorySpawnHandler}.
  *
+ * <h2>Faction System</h2>
+ * Act I requires the player to build standing with all four surviving factions:
+ * the Rootweavers, the Forgeborn, the Star Callers, and the Iron Pact.
+ * Each faction controls a different obstacle blocking the path to the Axis Temple.
+ * Faction reputation is tracked per-player by {@link net.mayaan.game.faction.FactionManager}.
+ *
  * @see MayaanBlocks
  * @see MayaanItems
  * @see net.mayaan.game.biome.MayaanBiomes
@@ -46,6 +54,7 @@ import net.mayaan.game.story.StoryChapter;
  * @see net.mayaan.game.magic.AnimaSystem
  * @see net.mayaan.game.story.StoryManager
  * @see net.mayaan.game.story.StorySpawnHandler
+ * @see net.mayaan.game.faction.FactionManager
  */
 public final class MayaanGame {
 
@@ -62,6 +71,7 @@ public final class MayaanGame {
      *   <li>{@link MayaanBlocks} — registers all Mayaan blocks</li>
      *   <li>{@link MayaanItems} — registers all Mayaan items (depends on blocks)</li>
      *   <li>{@link StoryChapter} — initializes all 14 story chapters and their goal lists</li>
+     *   <li>{@link Faction} — initializes all four surviving factions</li>
      * </ol>
      *
      * <p>Must be called after base game bootstrapping and before any world is loaded.
@@ -73,8 +83,10 @@ public final class MayaanGame {
         MayaanItems.class.getName();  // triggers static init of MayaanItems (which refs MayaanBlocks)
 
         // Eagerly initialize the story chapter enum so that all goal lists are populated
-        // before the first player joins. StoryChapter's static initializer calls initGoals()
-        // for each chapter, building the full goal tree.
+        // before the first player joins.
         StoryChapter.values();
+
+        // Eagerly initialize the faction enum so all faction metadata is ready.
+        Faction.values();
     }
 }

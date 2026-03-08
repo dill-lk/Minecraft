@@ -39,6 +39,7 @@ import net.mayaan.world.level.block.state.BlockBehaviour;
 import net.mayaan.world.level.gamerules.GameRule;
 import net.mayaan.world.level.gamerules.GameRuleTypeVisitor;
 import net.mayaan.world.level.gamerules.GameRules;
+import net.mayaan.game.MayaanGame;
 import org.slf4j.Logger;
 
 @SuppressForbidden(reason="System.out setup")
@@ -66,6 +67,7 @@ public class Bootstrap {
         DispenseItemBehavior.bootStrap();
         CauldronInteractions.bootStrap();
         BuiltInRegistries.bootStrap();
+        MayaanGame.bootstrap();
         CreativeModeTabs.validate();
         Bootstrap.wrapStreams();
         bootstrapDuration.set(Duration.between(start, Instant.now()).toMillis());

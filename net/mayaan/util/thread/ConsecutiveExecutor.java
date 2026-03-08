@@ -1,0 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.util.thread;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
+import net.mayaan.util.thread.AbstractConsecutiveExecutor;
+import net.mayaan.util.thread.StrictQueue;
+
+public class ConsecutiveExecutor
+extends AbstractConsecutiveExecutor<Runnable> {
+    public ConsecutiveExecutor(Executor dispatcher, String name) {
+        super(new StrictQueue.QueueStrictQueue(new ConcurrentLinkedQueue<Runnable>()), dispatcher, name);
+    }
+
+    @Override
+    public Runnable wrapRunnable(Runnable runnable) {
+        return runnable;
+    }
+}
+

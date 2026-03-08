@@ -1,0 +1,47 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mojang.serialization.MapCodec
+ */
+package net.mayaan.client.renderer.item.properties.conditional;
+
+import com.mojang.serialization.MapCodec;
+import net.mayaan.client.renderer.item.properties.conditional.Broken;
+import net.mayaan.client.renderer.item.properties.conditional.BundleHasSelectedItem;
+import net.mayaan.client.renderer.item.properties.conditional.ComponentMatches;
+import net.mayaan.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
+import net.mayaan.client.renderer.item.properties.conditional.CustomModelDataProperty;
+import net.mayaan.client.renderer.item.properties.conditional.Damaged;
+import net.mayaan.client.renderer.item.properties.conditional.ExtendedView;
+import net.mayaan.client.renderer.item.properties.conditional.FishingRodCast;
+import net.mayaan.client.renderer.item.properties.conditional.HasComponent;
+import net.mayaan.client.renderer.item.properties.conditional.IsCarried;
+import net.mayaan.client.renderer.item.properties.conditional.IsKeybindDown;
+import net.mayaan.client.renderer.item.properties.conditional.IsSelected;
+import net.mayaan.client.renderer.item.properties.conditional.IsUsingItem;
+import net.mayaan.client.renderer.item.properties.conditional.IsViewEntity;
+import net.mayaan.resources.Identifier;
+import net.mayaan.util.ExtraCodecs;
+
+public class ConditionalItemModelProperties {
+    private static final ExtraCodecs.LateBoundIdMapper<Identifier, MapCodec<? extends ConditionalItemModelProperty>> ID_MAPPER = new ExtraCodecs.LateBoundIdMapper();
+    public static final MapCodec<ConditionalItemModelProperty> MAP_CODEC = ID_MAPPER.codec(Identifier.CODEC).dispatchMap("property", ConditionalItemModelProperty::type, c -> c);
+
+    public static void bootstrap() {
+        ID_MAPPER.put(Identifier.withDefaultNamespace("custom_model_data"), CustomModelDataProperty.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("using_item"), IsUsingItem.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("broken"), Broken.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("damaged"), Damaged.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("fishing_rod/cast"), FishingRodCast.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("has_component"), HasComponent.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("bundle/has_selected_item"), BundleHasSelectedItem.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("selected"), IsSelected.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("carried"), IsCarried.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("extended_view"), ExtendedView.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("keybind_down"), IsKeybindDown.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("view_entity"), IsViewEntity.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("component"), ComponentMatches.MAP_CODEC);
+    }
+}
+

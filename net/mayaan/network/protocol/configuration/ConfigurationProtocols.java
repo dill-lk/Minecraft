@@ -1,0 +1,53 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.network.protocol.configuration;
+
+import net.mayaan.network.ConnectionProtocol;
+import net.mayaan.network.FriendlyByteBuf;
+import net.mayaan.network.ProtocolInfo;
+import net.mayaan.network.protocol.ProtocolInfoBuilder;
+import net.mayaan.network.protocol.SimpleUnboundProtocol;
+import net.mayaan.network.protocol.common.ClientboundClearDialogPacket;
+import net.mayaan.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.mayaan.network.protocol.common.ClientboundCustomReportDetailsPacket;
+import net.mayaan.network.protocol.common.ClientboundDisconnectPacket;
+import net.mayaan.network.protocol.common.ClientboundKeepAlivePacket;
+import net.mayaan.network.protocol.common.ClientboundPingPacket;
+import net.mayaan.network.protocol.common.ClientboundResourcePackPopPacket;
+import net.mayaan.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.mayaan.network.protocol.common.ClientboundServerLinksPacket;
+import net.mayaan.network.protocol.common.ClientboundShowDialogPacket;
+import net.mayaan.network.protocol.common.ClientboundStoreCookiePacket;
+import net.mayaan.network.protocol.common.ClientboundTransferPacket;
+import net.mayaan.network.protocol.common.ClientboundUpdateTagsPacket;
+import net.mayaan.network.protocol.common.CommonPacketTypes;
+import net.mayaan.network.protocol.common.ServerboundClientInformationPacket;
+import net.mayaan.network.protocol.common.ServerboundCustomClickActionPacket;
+import net.mayaan.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.mayaan.network.protocol.common.ServerboundKeepAlivePacket;
+import net.mayaan.network.protocol.common.ServerboundPongPacket;
+import net.mayaan.network.protocol.common.ServerboundResourcePackPacket;
+import net.mayaan.network.protocol.configuration.ClientConfigurationPacketListener;
+import net.mayaan.network.protocol.configuration.ClientboundCodeOfConductPacket;
+import net.mayaan.network.protocol.configuration.ClientboundFinishConfigurationPacket;
+import net.mayaan.network.protocol.configuration.ClientboundRegistryDataPacket;
+import net.mayaan.network.protocol.configuration.ClientboundResetChatPacket;
+import net.mayaan.network.protocol.configuration.ClientboundSelectKnownPacks;
+import net.mayaan.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
+import net.mayaan.network.protocol.configuration.ConfigurationPacketTypes;
+import net.mayaan.network.protocol.configuration.ServerConfigurationPacketListener;
+import net.mayaan.network.protocol.configuration.ServerboundAcceptCodeOfConductPacket;
+import net.mayaan.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.mayaan.network.protocol.configuration.ServerboundSelectKnownPacks;
+import net.mayaan.network.protocol.cookie.ClientboundCookieRequestPacket;
+import net.mayaan.network.protocol.cookie.CookiePacketTypes;
+import net.mayaan.network.protocol.cookie.ServerboundCookieResponsePacket;
+
+public class ConfigurationProtocols {
+    public static final SimpleUnboundProtocol<ServerConfigurationPacketListener, FriendlyByteBuf> SERVERBOUND_TEMPLATE = ProtocolInfoBuilder.serverboundProtocol(ConnectionProtocol.CONFIGURATION, builder -> builder.addPacket(CommonPacketTypes.SERVERBOUND_CLIENT_INFORMATION, ServerboundClientInformationPacket.STREAM_CODEC).addPacket(CookiePacketTypes.SERVERBOUND_COOKIE_RESPONSE, ServerboundCookieResponsePacket.STREAM_CODEC).addPacket(CommonPacketTypes.SERVERBOUND_CUSTOM_PAYLOAD, ServerboundCustomPayloadPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.SERVERBOUND_FINISH_CONFIGURATION, ServerboundFinishConfigurationPacket.STREAM_CODEC).addPacket(CommonPacketTypes.SERVERBOUND_KEEP_ALIVE, ServerboundKeepAlivePacket.STREAM_CODEC).addPacket(CommonPacketTypes.SERVERBOUND_PONG, ServerboundPongPacket.STREAM_CODEC).addPacket(CommonPacketTypes.SERVERBOUND_RESOURCE_PACK, ServerboundResourcePackPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.SERVERBOUND_SELECT_KNOWN_PACKS, ServerboundSelectKnownPacks.STREAM_CODEC).addPacket(CommonPacketTypes.SERVERBOUND_CUSTOM_CLICK_ACTION, ServerboundCustomClickActionPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.SERVERBOUND_ACCEPT_CODE_OF_CONDUCT, ServerboundAcceptCodeOfConductPacket.STREAM_CODEC));
+    public static final ProtocolInfo<ServerConfigurationPacketListener> SERVERBOUND = SERVERBOUND_TEMPLATE.bind(FriendlyByteBuf::new);
+    public static final SimpleUnboundProtocol<ClientConfigurationPacketListener, FriendlyByteBuf> CLIENTBOUND_TEMPLATE = ProtocolInfoBuilder.clientboundProtocol(ConnectionProtocol.CONFIGURATION, builder -> builder.addPacket(CookiePacketTypes.CLIENTBOUND_COOKIE_REQUEST, ClientboundCookieRequestPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_CUSTOM_PAYLOAD, ClientboundCustomPayloadPacket.CONFIG_STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_DISCONNECT, ClientboundDisconnectPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.CLIENTBOUND_FINISH_CONFIGURATION, ClientboundFinishConfigurationPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_KEEP_ALIVE, ClientboundKeepAlivePacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_PING, ClientboundPingPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.CLIENTBOUND_RESET_CHAT, ClientboundResetChatPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.CLIENTBOUND_REGISTRY_DATA, ClientboundRegistryDataPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_RESOURCE_PACK_POP, ClientboundResourcePackPopPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_RESOURCE_PACK_PUSH, ClientboundResourcePackPushPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_STORE_COOKIE, ClientboundStoreCookiePacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_TRANSFER, ClientboundTransferPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.CLIENTBOUND_UPDATE_ENABLED_FEATURES, ClientboundUpdateEnabledFeaturesPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_UPDATE_TAGS, ClientboundUpdateTagsPacket.STREAM_CODEC).addPacket(ConfigurationPacketTypes.CLIENTBOUND_SELECT_KNOWN_PACKS, ClientboundSelectKnownPacks.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_CUSTOM_REPORT_DETAILS, ClientboundCustomReportDetailsPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_SERVER_LINKS, ClientboundServerLinksPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_CLEAR_DIALOG, ClientboundClearDialogPacket.STREAM_CODEC).addPacket(CommonPacketTypes.CLIENTBOUND_SHOW_DIALOG, ClientboundShowDialogPacket.CONTEXT_FREE_STREAM_CODEC).addPacket(ConfigurationPacketTypes.CLIENTBOUND_CODE_OF_CONDUCT, ClientboundCodeOfConductPacket.STREAM_CODEC));
+    public static final ProtocolInfo<ClientConfigurationPacketListener> CLIENTBOUND = CLIENTBOUND_TEMPLATE.bind(FriendlyByteBuf::new);
+}
+

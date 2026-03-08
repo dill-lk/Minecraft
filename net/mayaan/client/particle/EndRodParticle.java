@@ -1,0 +1,47 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.client.particle;
+
+import net.mayaan.client.multiplayer.ClientLevel;
+import net.mayaan.client.particle.Particle;
+import net.mayaan.client.particle.ParticleProvider;
+import net.mayaan.client.particle.SimpleAnimatedParticle;
+import net.mayaan.client.particle.SpriteSet;
+import net.mayaan.core.particles.SimpleParticleType;
+import net.mayaan.util.RandomSource;
+
+public class EndRodParticle
+extends SimpleAnimatedParticle {
+    private EndRodParticle(ClientLevel level, double x, double y, double z, double xa, double ya, double za, SpriteSet sprites) {
+        super(level, x, y, z, sprites, 0.0125f);
+        this.xd = xa;
+        this.yd = ya;
+        this.zd = za;
+        this.quadSize *= 0.75f;
+        this.lifetime = 60 + this.random.nextInt(12);
+        this.setFadeColor(15916745);
+        this.setSpriteFromAge(sprites);
+    }
+
+    @Override
+    public void move(double xa, double ya, double za) {
+        this.setBoundingBox(this.getBoundingBox().move(xa, ya, za));
+        this.setLocationFromBoundingbox();
+    }
+
+    public static class Provider
+    implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public Provider(SpriteSet sprites) {
+            this.sprites = sprites;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType options, ClientLevel level, double x, double y, double z, double xAux, double yAux, double zAux, RandomSource random) {
+            return new EndRodParticle(level, x, y, z, xAux, yAux, zAux, this.sprites);
+        }
+    }
+}
+

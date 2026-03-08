@@ -1,0 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.world.effect;
+
+import net.mayaan.server.level.ServerLevel;
+import net.mayaan.world.effect.MobEffect;
+import net.mayaan.world.effect.MobEffectCategory;
+import net.mayaan.world.entity.LivingEntity;
+import net.mayaan.world.entity.player.Player;
+
+class HungerMobEffect
+extends MobEffect {
+    protected HungerMobEffect(MobEffectCategory category, int color) {
+        super(category, color);
+    }
+
+    @Override
+    public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity mob, int amplification) {
+        if (mob instanceof Player) {
+            Player player = (Player)mob;
+            player.causeFoodExhaustion(0.005f * (float)(amplification + 1));
+        }
+        return true;
+    }
+
+    @Override
+    public boolean shouldApplyEffectTickThisTick(int tickCount, int amplification) {
+        return true;
+    }
+}
+

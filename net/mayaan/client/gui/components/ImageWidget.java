@@ -1,0 +1,98 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.Nullable
+ */
+package net.mayaan.client.gui.components;
+
+import net.mayaan.client.gui.ComponentPath;
+import net.mayaan.client.gui.GuiGraphics;
+import net.mayaan.client.gui.components.AbstractWidget;
+import net.mayaan.client.gui.narration.NarrationElementOutput;
+import net.mayaan.client.gui.navigation.FocusNavigationEvent;
+import net.mayaan.client.renderer.RenderPipelines;
+import net.mayaan.client.sounds.SoundManager;
+import net.mayaan.network.chat.CommonComponents;
+import net.mayaan.resources.Identifier;
+import org.jspecify.annotations.Nullable;
+
+public abstract class ImageWidget
+extends AbstractWidget {
+    private ImageWidget(int x, int y, int width, int height) {
+        super(x, y, width, height, CommonComponents.EMPTY);
+    }
+
+    public static ImageWidget texture(int width, int height, Identifier texture, int textureWidth, int textureHeight) {
+        return new Texture(0, 0, width, height, texture, textureWidth, textureHeight);
+    }
+
+    public static ImageWidget sprite(int width, int height, Identifier sprite) {
+        return new Sprite(0, 0, width, height, sprite);
+    }
+
+    @Override
+    protected void updateWidgetNarration(NarrationElementOutput output) {
+    }
+
+    @Override
+    public void playDownSound(SoundManager soundManager) {
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+
+    public abstract void updateResource(Identifier var1);
+
+    @Override
+    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigationEvent) {
+        return null;
+    }
+
+    private static class Texture
+    extends ImageWidget {
+        private Identifier texture;
+        private final int textureWidth;
+        private final int textureHeight;
+
+        public Texture(int x, int y, int width, int height, Identifier texture, int textureWidth, int textureHeight) {
+            super(x, y, width, height);
+            this.texture = texture;
+            this.textureWidth = textureWidth;
+            this.textureHeight = textureHeight;
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float a) {
+            graphics.blit(RenderPipelines.GUI_TEXTURED, this.texture, this.getX(), this.getY(), 0.0f, 0.0f, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
+        }
+
+        @Override
+        public void updateResource(Identifier identifier) {
+            this.texture = identifier;
+        }
+    }
+
+    private static class Sprite
+    extends ImageWidget {
+        private Identifier sprite;
+
+        public Sprite(int x, int y, int width, int height, Identifier sprite) {
+            super(x, y, width, height);
+            this.sprite = sprite;
+        }
+
+        @Override
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float a) {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        }
+
+        @Override
+        public void updateResource(Identifier identifier) {
+            this.sprite = identifier;
+        }
+    }
+}
+

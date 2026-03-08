@@ -1,0 +1,218 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.Nullable
+ */
+package net.mayaan.client.gui.screens;
+
+import java.net.URI;
+import java.util.Optional;
+import java.util.function.Supplier;
+import net.mayaan.SharedConstants;
+import net.mayaan.client.Mayaan;
+import net.mayaan.client.Options;
+import net.mayaan.client.gui.GuiGraphics;
+import net.mayaan.client.gui.components.Button;
+import net.mayaan.client.gui.components.StringWidget;
+import net.mayaan.client.gui.components.Tooltip;
+import net.mayaan.client.gui.components.toasts.NowPlayingToast;
+import net.mayaan.client.gui.layouts.FrameLayout;
+import net.mayaan.client.gui.layouts.GridLayout;
+import net.mayaan.client.gui.layouts.HeaderAndFooterLayout;
+import net.mayaan.client.gui.screens.ConfirmLinkScreen;
+import net.mayaan.client.gui.screens.Screen;
+import net.mayaan.client.gui.screens.ShareToLanScreen;
+import net.mayaan.client.gui.screens.achievement.StatsScreen;
+import net.mayaan.client.gui.screens.advancements.AdvancementsScreen;
+import net.mayaan.client.gui.screens.options.OptionsScreen;
+import net.mayaan.client.gui.screens.social.SocialInteractionsScreen;
+import net.mayaan.client.multiplayer.ClientLevel;
+import net.mayaan.client.renderer.RenderPipelines;
+import net.mayaan.core.Holder;
+import net.mayaan.core.HolderLookup;
+import net.mayaan.core.HolderSet;
+import net.mayaan.core.registries.Registries;
+import net.mayaan.network.chat.CommonComponents;
+import net.mayaan.network.chat.Component;
+import net.mayaan.resources.Identifier;
+import net.mayaan.server.ServerLinks;
+import net.mayaan.server.dialog.Dialog;
+import net.mayaan.server.dialog.Dialogs;
+import net.mayaan.sounds.SoundSource;
+import net.mayaan.tags.DialogTags;
+import net.mayaan.util.CommonLinks;
+import org.jspecify.annotations.Nullable;
+
+public class PauseScreen
+extends Screen {
+    private static final Identifier DRAFT_REPORT_SPRITE = Identifier.withDefaultNamespace("icon/draft_report");
+    private static final int COLUMNS = 2;
+    private static final int MENU_PADDING_TOP = 50;
+    private static final int BUTTON_PADDING = 4;
+    private static final int BUTTON_WIDTH_FULL = 204;
+    private static final int BUTTON_WIDTH_HALF = 98;
+    private static final Component RETURN_TO_GAME = Component.translatable("menu.returnToGame");
+    private static final Component ADVANCEMENTS = Component.translatable("gui.advancements");
+    private static final Component STATS = Component.translatable("gui.stats");
+    private static final Component SEND_FEEDBACK = Component.translatable("menu.sendFeedback");
+    private static final Component REPORT_BUGS = Component.translatable("menu.reportBugs");
+    private static final Component FEEDBACK_SUBSCREEN = Component.translatable("menu.feedback");
+    private static final Component OPTIONS = Component.translatable("menu.options");
+    private static final Component SHARE_TO_LAN = Component.translatable("menu.shareToLan");
+    private static final Component PLAYER_REPORTING = Component.translatable("menu.playerReporting");
+    private static final Component GAME = Component.translatable("menu.game");
+    private static final Component PAUSED = Component.translatable("menu.paused");
+    private static final Tooltip CUSTOM_OPTIONS_TOOLTIP = Tooltip.create(Component.translatable("menu.custom_options.tooltip"));
+    private final boolean showPauseMenu;
+    private @Nullable Button disconnectButton;
+
+    public PauseScreen(boolean showPauseMenu) {
+        super(showPauseMenu ? GAME : PAUSED);
+        this.showPauseMenu = showPauseMenu;
+    }
+
+    public boolean showsPauseMenu() {
+        return this.showPauseMenu;
+    }
+
+    @Override
+    protected void init() {
+        if (this.showPauseMenu) {
+            this.createPauseMenu();
+        }
+        int textWidth = this.font.width(this.title);
+        this.addRenderableWidget(new StringWidget(this.width / 2 - textWidth / 2, this.showPauseMenu ? 40 : 10, textWidth, this.font.lineHeight, this.title, this.font));
+    }
+
+    private void createPauseMenu() {
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
+        GridLayout.RowHelper helper = gridLayout.createRowHelper(2);
+        helper.addChild(Button.builder(RETURN_TO_GAME, button -> {
+            this.minecraft.setScreen(null);
+            this.minecraft.mouseHandler.grabMouse();
+        }).width(204).build(), 2, gridLayout.newCellSettings().paddingTop(50));
+        helper.addChild(this.openScreenButton(ADVANCEMENTS, () -> new AdvancementsScreen(this.minecraft.player.connection.getAdvancements(), this)));
+        helper.addChild(this.openScreenButton(STATS, () -> new StatsScreen(this, this.minecraft.player.getStats())));
+        Optional<? extends Holder<Dialog>> additions = this.getCustomAdditions();
+        if (additions.isEmpty()) {
+            PauseScreen.addFeedbackButtons(this, helper);
+        } else {
+            this.addFeedbackSubscreenAndCustomDialogButtons(this.minecraft, additions.get(), helper);
+        }
+        helper.addChild(this.openScreenButton(OPTIONS, () -> new OptionsScreen(this, this.minecraft.options, true)));
+        if (this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished()) {
+            helper.addChild(this.openScreenButton(SHARE_TO_LAN, () -> new ShareToLanScreen(this)));
+        } else {
+            helper.addChild(this.openScreenButton(PLAYER_REPORTING, () -> new SocialInteractionsScreen(this)));
+        }
+        this.disconnectButton = helper.addChild(Button.builder(CommonComponents.disconnectButtonLabel(this.minecraft.isLocalServer()), button -> {
+            button.active = false;
+            this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, () -> this.minecraft.disconnectFromWorld(ClientLevel.DEFAULT_QUIT_MESSAGE), true);
+        }).width(204).build(), 2);
+        gridLayout.arrangeElements();
+        FrameLayout.alignInRectangle(gridLayout, 0, 0, this.width, this.height, 0.5f, 0.25f);
+        gridLayout.visitWidgets(this::addRenderableWidget);
+    }
+
+    private Optional<? extends Holder<Dialog>> getCustomAdditions() {
+        HolderSet customAdditions;
+        HolderLookup.RegistryLookup dialogRegistry = this.minecraft.player.connection.registryAccess().lookupOrThrow(Registries.DIALOG);
+        Optional maybeCustomAdditions = dialogRegistry.get(DialogTags.PAUSE_SCREEN_ADDITIONS);
+        if (maybeCustomAdditions.isPresent() && (customAdditions = (HolderSet)maybeCustomAdditions.get()).size() > 0) {
+            if (customAdditions.size() == 1) {
+                return Optional.of(customAdditions.get(0));
+            }
+            return dialogRegistry.get(Dialogs.CUSTOM_OPTIONS);
+        }
+        ServerLinks serverLinks = this.minecraft.player.connection.serverLinks();
+        if (!serverLinks.isEmpty()) {
+            return dialogRegistry.get(Dialogs.SERVER_LINKS);
+        }
+        return Optional.empty();
+    }
+
+    private static void addFeedbackButtons(Screen screen, GridLayout.RowHelper helper) {
+        helper.addChild(PauseScreen.openLinkButton(screen, SEND_FEEDBACK, SharedConstants.getCurrentVersion().stable() ? CommonLinks.RELEASE_FEEDBACK : CommonLinks.SNAPSHOT_FEEDBACK));
+        helper.addChild(PauseScreen.openLinkButton((Screen)screen, (Component)PauseScreen.REPORT_BUGS, (URI)CommonLinks.SNAPSHOT_BUGS_FEEDBACK)).active = !SharedConstants.getCurrentVersion().dataVersion().isSideSeries();
+    }
+
+    private void addFeedbackSubscreenAndCustomDialogButtons(Mayaan minecraft, Holder<Dialog> dialog, GridLayout.RowHelper helper) {
+        helper.addChild(this.openScreenButton(FEEDBACK_SUBSCREEN, () -> new FeedbackSubScreen(this)));
+        helper.addChild(Button.builder(dialog.value().common().computeExternalTitle(), button -> minecraft.player.connection.showDialog(dialog, this)).width(98).tooltip(CUSTOM_OPTIONS_TOOLTIP).build());
+    }
+
+    @Override
+    public void tick() {
+        if (this.rendersNowPlayingToast()) {
+            NowPlayingToast.tickMusicNotes();
+        }
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float a) {
+        super.render(graphics, mouseX, mouseY, a);
+        if (this.rendersNowPlayingToast()) {
+            NowPlayingToast.renderToast(graphics, this.font);
+        }
+        if (this.showPauseMenu && this.minecraft.getReportingContext().hasDraftReport() && this.disconnectButton != null) {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, DRAFT_REPORT_SPRITE, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 15, 15);
+        }
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float a) {
+        if (this.showPauseMenu) {
+            super.renderBackground(graphics, mouseX, mouseY, a);
+        }
+    }
+
+    public boolean rendersNowPlayingToast() {
+        Options options = this.minecraft.options;
+        return options.musicToast().get().renderInPauseScreen() && options.getFinalSoundSourceVolume(SoundSource.MUSIC) > 0.0f && this.showPauseMenu;
+    }
+
+    private Button openScreenButton(Component message, Supplier<Screen> newScreen) {
+        return Button.builder(message, button -> this.minecraft.setScreen((Screen)newScreen.get())).width(98).build();
+    }
+
+    private static Button openLinkButton(Screen screen, Component message, URI link) {
+        return Button.builder(message, ConfirmLinkScreen.confirmLink(screen, link)).width(98).build();
+    }
+
+    private static class FeedbackSubScreen
+    extends Screen {
+        private static final Component TITLE = Component.translatable("menu.feedback.title");
+        public final Screen parent;
+        private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+
+        protected FeedbackSubScreen(Screen parent) {
+            super(TITLE);
+            this.parent = parent;
+        }
+
+        @Override
+        protected void init() {
+            this.layout.addTitleHeader(TITLE, this.font);
+            GridLayout buttonContainer = this.layout.addToContents(new GridLayout());
+            buttonContainer.defaultCellSetting().padding(4, 4, 4, 0);
+            GridLayout.RowHelper helper = buttonContainer.createRowHelper(2);
+            PauseScreen.addFeedbackButtons(this, helper);
+            this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).width(200).build());
+            this.layout.visitWidgets(this::addRenderableWidget);
+            this.repositionElements();
+        }
+
+        @Override
+        protected void repositionElements() {
+            this.layout.arrangeElements();
+        }
+
+        @Override
+        public void onClose() {
+            this.minecraft.setScreen(this.parent);
+        }
+    }
+}
+

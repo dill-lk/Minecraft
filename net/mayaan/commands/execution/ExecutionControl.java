@@ -1,0 +1,51 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.Nullable
+ */
+package net.mayaan.commands.execution;
+
+import net.mayaan.commands.ExecutionCommandSource;
+import net.mayaan.commands.execution.CommandQueueEntry;
+import net.mayaan.commands.execution.EntryAction;
+import net.mayaan.commands.execution.ExecutionContext;
+import net.mayaan.commands.execution.Frame;
+import net.mayaan.commands.execution.TraceCallbacks;
+import org.jspecify.annotations.Nullable;
+
+public interface ExecutionControl<T> {
+    public void queueNext(EntryAction<T> var1);
+
+    public void tracer(@Nullable TraceCallbacks var1);
+
+    public @Nullable TraceCallbacks tracer();
+
+    public Frame currentFrame();
+
+    public static <T extends ExecutionCommandSource<T>> ExecutionControl<T> create(final ExecutionContext<T> context, final Frame frame) {
+        return new ExecutionControl<T>(){
+
+            @Override
+            public void queueNext(EntryAction<T> action) {
+                context.queueNext(new CommandQueueEntry(frame, action));
+            }
+
+            @Override
+            public void tracer(@Nullable TraceCallbacks tracer) {
+                context.tracer(tracer);
+            }
+
+            @Override
+            public @Nullable TraceCallbacks tracer() {
+                return context.tracer();
+            }
+
+            @Override
+            public Frame currentFrame() {
+                return frame;
+            }
+        };
+    }
+}
+

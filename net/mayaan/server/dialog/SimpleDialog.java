@@ -1,0 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mojang.serialization.MapCodec
+ */
+package net.mayaan.server.dialog;
+
+import com.mojang.serialization.MapCodec;
+import java.util.List;
+import net.mayaan.server.dialog.ActionButton;
+import net.mayaan.server.dialog.Dialog;
+
+public interface SimpleDialog
+extends Dialog {
+    public MapCodec<? extends SimpleDialog> codec();
+
+    public List<ActionButton> mainActions();
+}
+

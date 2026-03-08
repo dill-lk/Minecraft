@@ -1,0 +1,45 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.client.resources.sounds;
+
+import net.mayaan.client.player.LocalPlayer;
+import net.mayaan.client.resources.sounds.AmbientSoundHandler;
+import net.mayaan.client.resources.sounds.UnderwaterAmbientSoundInstances;
+import net.mayaan.client.sounds.SoundManager;
+import net.mayaan.sounds.SoundEvents;
+
+public class UnderwaterAmbientSoundHandler
+implements AmbientSoundHandler {
+    public static final float CHANCE_PER_TICK = 0.01f;
+    public static final float RARE_CHANCE_PER_TICK = 0.001f;
+    public static final float ULTRA_RARE_CHANCE_PER_TICK = 1.0E-4f;
+    private static final int MINIMUM_TICK_DELAY = 0;
+    private final LocalPlayer player;
+    private final SoundManager soundManager;
+    private int tickDelay = 0;
+
+    public UnderwaterAmbientSoundHandler(LocalPlayer player, SoundManager soundManager) {
+        this.player = player;
+        this.soundManager = soundManager;
+    }
+
+    @Override
+    public void tick() {
+        --this.tickDelay;
+        if (this.tickDelay <= 0 && this.player.isUnderWater()) {
+            float rand = this.player.level().getRandom().nextFloat();
+            if (rand < 1.0E-4f) {
+                this.tickDelay = 0;
+                this.soundManager.play(new UnderwaterAmbientSoundInstances.SubSound(this.player, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_ULTRA_RARE));
+            } else if (rand < 0.001f) {
+                this.tickDelay = 0;
+                this.soundManager.play(new UnderwaterAmbientSoundInstances.SubSound(this.player, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_RARE));
+            } else if (rand < 0.01f) {
+                this.tickDelay = 0;
+                this.soundManager.play(new UnderwaterAmbientSoundInstances.SubSound(this.player, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS));
+            }
+        }
+    }
+}
+

@@ -1,0 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mojang.authlib.minecraft.UserApiService
+ */
+package net.mayaan.client.multiplayer;
+
+import com.mojang.authlib.minecraft.UserApiService;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import net.mayaan.client.User;
+import net.mayaan.client.multiplayer.AccountProfileKeyPairManager;
+import net.mayaan.world.entity.player.ProfileKeyPair;
+
+public interface ProfileKeyPairManager {
+    public static final ProfileKeyPairManager EMPTY_KEY_MANAGER = new ProfileKeyPairManager(){
+
+        @Override
+        public CompletableFuture<Optional<ProfileKeyPair>> prepareKeyPair() {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        @Override
+        public boolean shouldRefreshKeyPair() {
+            return false;
+        }
+    };
+
+    public static ProfileKeyPairManager create(UserApiService userApiService, User user, Path gameDirectory) {
+        return new AccountProfileKeyPairManager(userApiService, user.getProfileId(), gameDirectory);
+    }
+
+    public CompletableFuture<Optional<ProfileKeyPair>> prepareKeyPair();
+
+    public boolean shouldRefreshKeyPair();
+}
+

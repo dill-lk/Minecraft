@@ -1,0 +1,60 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.common.collect.ImmutableList
+ *  com.mojang.datafixers.util.Pair
+ */
+package net.mayaan.data.worldgen;
+
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
+import java.util.List;
+import java.util.function.Function;
+import net.mayaan.core.Holder;
+import net.mayaan.core.HolderGetter;
+import net.mayaan.core.registries.Registries;
+import net.mayaan.data.worldgen.AncientCityStructurePieces;
+import net.mayaan.data.worldgen.BastionPieces;
+import net.mayaan.data.worldgen.BootstrapContext;
+import net.mayaan.data.worldgen.PillagerOutpostPools;
+import net.mayaan.data.worldgen.TrailRuinsStructurePools;
+import net.mayaan.data.worldgen.TrialChambersStructurePools;
+import net.mayaan.data.worldgen.VillagePools;
+import net.mayaan.resources.Identifier;
+import net.mayaan.resources.ResourceKey;
+import net.mayaan.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.mayaan.world.level.levelgen.structure.pools.StructureTemplatePool;
+
+public class Pools {
+    public static final ResourceKey<StructureTemplatePool> EMPTY = Pools.createKey("empty");
+
+    public static ResourceKey<StructureTemplatePool> createKey(Identifier location) {
+        return ResourceKey.create(Registries.TEMPLATE_POOL, location);
+    }
+
+    public static ResourceKey<StructureTemplatePool> createKey(String name) {
+        return Pools.createKey(Identifier.withDefaultNamespace(name));
+    }
+
+    public static ResourceKey<StructureTemplatePool> parseKey(String name) {
+        return Pools.createKey(Identifier.parse(name));
+    }
+
+    public static void register(BootstrapContext<StructureTemplatePool> context, String name, StructureTemplatePool pool) {
+        context.register(Pools.createKey(name), pool);
+    }
+
+    public static void bootstrap(BootstrapContext<StructureTemplatePool> context) {
+        HolderGetter<StructureTemplatePool> pools = context.lookup(Registries.TEMPLATE_POOL);
+        Holder.Reference<StructureTemplatePool> empty = pools.getOrThrow(EMPTY);
+        context.register(EMPTY, new StructureTemplatePool(empty, (List<Pair<Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>, Integer>>)ImmutableList.of(), StructureTemplatePool.Projection.RIGID));
+        BastionPieces.bootstrap(context);
+        PillagerOutpostPools.bootstrap(context);
+        VillagePools.bootstrap(context);
+        AncientCityStructurePieces.bootstrap(context);
+        TrailRuinsStructurePools.bootstrap(context);
+        TrialChambersStructurePools.bootstrap(context);
+    }
+}
+

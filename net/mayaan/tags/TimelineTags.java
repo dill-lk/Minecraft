@@ -1,0 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.tags;
+
+import net.mayaan.core.registries.Registries;
+import net.mayaan.resources.Identifier;
+import net.mayaan.tags.TagKey;
+import net.mayaan.world.timeline.Timeline;
+
+public interface TimelineTags {
+    public static final TagKey<Timeline> UNIVERSAL = TimelineTags.create("universal");
+    public static final TagKey<Timeline> IN_OVERWORLD = TimelineTags.create("in_overworld");
+    public static final TagKey<Timeline> IN_NETHER = TimelineTags.create("in_nether");
+    public static final TagKey<Timeline> IN_END = TimelineTags.create("in_end");
+
+    private static TagKey<Timeline> create(String name) {
+        return TagKey.create(Registries.TIMELINE, Identifier.withDefaultNamespace(name));
+    }
+}
+

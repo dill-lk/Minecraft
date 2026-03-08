@@ -1,5 +1,7 @@
 package net.mayaan.game;
 
+import net.mayaan.game.story.StoryChapter;
+
 /**
  * MayaanGame — the central initialization point for all Mayaan-specific content.
  *
@@ -11,23 +13,39 @@ package net.mayaan.game;
  * <ol>
  *   <li>{@link MayaanBlocks} — Mayaan-specific blocks (Glyph Stone, Anima Crystal, etc.)</li>
  *   <li>{@link MayaanItems} — Mayaan-specific items and block items</li>
+ *   <li>{@link net.mayaan.game.story.StoryChapter} — all story chapters and their goals</li>
  * </ol>
  *
- * <h2>The world of Mayaan</h2>
- * Thousands of years ago, the Mayaan — a mighty empire of scholars, warriors, and mystics —
- * built wonders that defied the natural order. Their cities floated above canopies of eternal
- * forest. Their priests could speak to stars. Then, in a single night known as The Unraveling,
- * everything vanished.
+ * <h2>The story of Mayaan</h2>
+ * This is not a sandbox. Every playthrough begins with a story.
  *
- * <p>You arrive on this world with nothing but your hands, your wits, and a fragment of a map
- * carved in a language nobody alive can read. Discover what happened to the Mayaan.
- * Inherit their power. Or become the next civilization to be swallowed by the dark.
+ * <p>You wake on the Isle of First Light with no memories, carrying a Stone Shard that
+ * glows with an ancient Mayaan glyph. An ancient Construct named Ix has been waiting
+ * for you for three thousand years. A buried temple holds a message left centuries ago
+ * by a scout who somehow knew you were coming. The message ends with:
+ * <em>"We're sorry for what you're about to learn."</em>
+ *
+ * <p>Thousands of years ago, the Mayaan — a civilization of scholars, warriors, and mystics —
+ * built wonders that defied the natural order. Then, in a single night known as The Unraveling,
+ * they vanished. Not destroyed. Not killed. <em>Translated.</em> They sacrificed themselves
+ * to seal a cosmic force of entropy — and they are still there, holding the seal, waiting.
+ *
+ * <p>The seal is weakening. You carry the one tool that can change the outcome.
+ * Discover what happened. Inherit their power. Choose the world's fate.
+ *
+ * <h2>Story Structure</h2>
+ * The game progresses through three acts and twelve chapters plus prologue and epilogue,
+ * each with story goals the player must accomplish. Goals are tracked per-player by
+ * {@link net.mayaan.game.story.StoryManager}. New players spawn on the Isle of First Light
+ * and receive the Stone Shard via {@link net.mayaan.game.story.StorySpawnHandler}.
  *
  * @see MayaanBlocks
  * @see MayaanItems
  * @see net.mayaan.game.biome.MayaanBiomes
  * @see net.mayaan.game.magic.GlyphType
  * @see net.mayaan.game.magic.AnimaSystem
+ * @see net.mayaan.game.story.StoryManager
+ * @see net.mayaan.game.story.StorySpawnHandler
  */
 public final class MayaanGame {
 
@@ -39,8 +57,12 @@ public final class MayaanGame {
     /**
      * Bootstraps all Mayaan-specific registrations.
      *
-     * <p>Calling this method triggers the static initializers of {@link MayaanBlocks} and
-     * {@link MayaanItems}, registering all Mayaan content into the built-in registries.
+     * <p>Calling this method triggers the static initializers of:
+     * <ol>
+     *   <li>{@link MayaanBlocks} — registers all Mayaan blocks</li>
+     *   <li>{@link MayaanItems} — registers all Mayaan items (depends on blocks)</li>
+     *   <li>{@link StoryChapter} — initializes all 14 story chapters and their goal lists</li>
+     * </ol>
      *
      * <p>Must be called after base game bootstrapping and before any world is loaded.
      */
@@ -49,5 +71,10 @@ public final class MayaanGame {
         // blocks must be registered before their block items
         MayaanBlocks.class.getName(); // triggers static init of MayaanBlocks
         MayaanItems.class.getName();  // triggers static init of MayaanItems (which refs MayaanBlocks)
+
+        // Eagerly initialize the story chapter enum so that all goal lists are populated
+        // before the first player joins. StoryChapter's static initializer calls initGoals()
+        // for each chapter, building the full goal tree.
+        StoryChapter.values();
     }
 }

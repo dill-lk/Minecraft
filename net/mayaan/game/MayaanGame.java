@@ -1,6 +1,9 @@
 package net.mayaan.game;
 
+import net.mayaan.game.echo.TimelineEchoRegistry;
 import net.mayaan.game.faction.Faction;
+import net.mayaan.game.magic.GlyphMastery;
+import net.mayaan.game.magic.GlyphType;
 import net.mayaan.game.story.StoryChapter;
 
 /**
@@ -16,6 +19,8 @@ import net.mayaan.game.story.StoryChapter;
  *   <li>{@link MayaanItems} — Mayaan-specific items and block items</li>
  *   <li>{@link StoryChapter} — all 14 story chapters and their goal lists</li>
  *   <li>{@link Faction} — all four surviving factions with standing thresholds</li>
+ *   <li>{@link GlyphType} / {@link GlyphMastery} — glyph type and mastery tier enums</li>
+ *   <li>{@link TimelineEchoRegistry} — all 12 major story Timeline Echoes</li>
  * </ol>
  *
  * <h2>The story of Mayaan</h2>
@@ -47,14 +52,28 @@ import net.mayaan.game.story.StoryChapter;
  * Each faction controls a different obstacle blocking the path to the Axis Temple.
  * Faction reputation is tracked per-player by {@link net.mayaan.game.faction.FactionManager}.
  *
+ * <h2>Glyph Knowledge</h2>
+ * Players collect {@link net.mayaan.game.item.GlyphFragment Glyph Fragments} across all seven
+ * glyph types. Fragment count determines mastery tier ({@link GlyphMastery}); the number
+ * of glyph types at {@link GlyphMastery#PRACTICED}+ is the Glyph Knowledge score (0–7),
+ * the second major story gate alongside faction standing. Per-player tracking is handled by
+ * {@link net.mayaan.game.magic.GlyphKnowledgeManager}.
+ *
+ * <h2>Timeline Echoes</h2>
+ * Timeline Echoes are cinematic memory sequences triggered by Glyph Shards and Anima-saturated
+ * locations. The 12 major story echoes — from the Prologue's Scout's Warning through
+ * Camazotz's final communication in Act III — are defined in {@link TimelineEchoRegistry}.
+ *
  * @see MayaanBlocks
  * @see MayaanItems
  * @see net.mayaan.game.biome.MayaanBiomes
  * @see net.mayaan.game.magic.GlyphType
  * @see net.mayaan.game.magic.AnimaSystem
+ * @see net.mayaan.game.magic.GlyphKnowledgeManager
  * @see net.mayaan.game.story.StoryManager
  * @see net.mayaan.game.story.StorySpawnHandler
  * @see net.mayaan.game.faction.FactionManager
+ * @see TimelineEchoRegistry
  */
 public final class MayaanGame {
 
@@ -72,6 +91,8 @@ public final class MayaanGame {
      *   <li>{@link MayaanItems} — registers all Mayaan items (depends on blocks)</li>
      *   <li>{@link StoryChapter} — initializes all 14 story chapters and their goal lists</li>
      *   <li>{@link Faction} — initializes all four surviving factions</li>
+     *   <li>{@link GlyphType} / {@link GlyphMastery} — glyph progression enums</li>
+     *   <li>{@link TimelineEchoRegistry} — builds all 12 major Timeline Echo sequences</li>
      * </ol>
      *
      * <p>Must be called after base game bootstrapping and before any world is loaded.
@@ -88,5 +109,12 @@ public final class MayaanGame {
 
         // Eagerly initialize the faction enum so all faction metadata is ready.
         Faction.values();
+
+        // Eagerly initialize glyph progression enums.
+        GlyphType.values();
+        GlyphMastery.values();
+
+        // Eagerly build all Timeline Echo sequences so they are ready before world load.
+        TimelineEchoRegistry.all();
     }
 }

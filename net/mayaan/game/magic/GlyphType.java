@@ -62,6 +62,20 @@ public enum GlyphType {
         return scriptName;
     }
 
+    /**
+     * Finds a glyph type by its string ID. Returns {@code null} if not found.
+     *
+     * @param id the glyph identifier (e.g., {@code "seek"})
+     */
+    public static GlyphType byId(String id) {
+        for (GlyphType type : values()) {
+            if (type.id.equals(id)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "mayaan:glyph/" + id;

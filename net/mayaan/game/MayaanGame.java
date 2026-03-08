@@ -1,10 +1,12 @@
 package net.mayaan.game;
 
 import net.mayaan.game.echo.TimelineEchoRegistry;
+import net.mayaan.game.entity.MayaanEntities;
 import net.mayaan.game.faction.Faction;
 import net.mayaan.game.item.IxchelicShard;
 import net.mayaan.game.item.WandererKey;
 import net.mayaan.game.magic.AnimaManager;
+import net.mayaan.game.magic.GlyphCasting;
 import net.mayaan.game.magic.GlyphKnowledgeManager;
 import net.mayaan.game.magic.GlyphMastery;
 import net.mayaan.game.magic.GlyphType;
@@ -140,9 +142,20 @@ public final class MayaanGame {
         IxchelicShard.Index.values();
         WandererKey.KeyIndex.values();
 
+        // Eagerly register all entity types so they are available at world load.
+        MayaanEntities.class.getName();
+
+        // Eagerly initialize cast tier enum.
+        GlyphCasting.CastTier.values();
+        GlyphCasting.CastOutcome.values();
+
+        // Eagerly initialize dimension registry.
+        MayaanDimensions.class.getName();
+
         // Touch singleton managers so they are initialized (though they hold no static
         // state that needs warming — this just confirms they are classloaded early).
         AnimaManager.INSTANCE.getClass();
         GlyphKnowledgeManager.INSTANCE.getClass();
+        PlayerDataStore.INSTANCE.getClass();
     }
 }

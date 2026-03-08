@@ -2,6 +2,10 @@ package net.mayaan.game;
 
 import net.mayaan.game.echo.TimelineEchoRegistry;
 import net.mayaan.game.faction.Faction;
+import net.mayaan.game.item.IxchelicShard;
+import net.mayaan.game.item.WandererKey;
+import net.mayaan.game.magic.AnimaManager;
+import net.mayaan.game.magic.GlyphKnowledgeManager;
 import net.mayaan.game.magic.GlyphMastery;
 import net.mayaan.game.magic.GlyphType;
 import net.mayaan.game.story.StoryChapter;
@@ -16,11 +20,13 @@ import net.mayaan.game.story.StoryChapter;
  * <h2>What this initializes</h2>
  * <ol>
  *   <li>{@link MayaanBlocks} — Mayaan-specific blocks (Glyph Stone, Anima Crystal, etc.)</li>
- *   <li>{@link MayaanItems} — Mayaan-specific items and block items</li>
+ *   <li>{@link MayaanItems} — Mayaan-specific items and block items (including Ixchelic Shards,
+ *       Wanderer's Keys, and Codex Fragments)</li>
  *   <li>{@link StoryChapter} — all 14 story chapters and their goal lists</li>
  *   <li>{@link Faction} — all four surviving factions with standing thresholds</li>
  *   <li>{@link GlyphType} / {@link GlyphMastery} — glyph type and mastery tier enums</li>
  *   <li>{@link TimelineEchoRegistry} — all 12 major story Timeline Echoes</li>
+ *   <li>{@link IxchelicShard.Index} / {@link WandererKey.KeyIndex} — Act II quest item enums</li>
  * </ol>
  *
  * <h2>The story of Mayaan</h2>
@@ -57,19 +63,31 @@ import net.mayaan.game.story.StoryChapter;
  * glyph types. Fragment count determines mastery tier ({@link GlyphMastery}); the number
  * of glyph types at {@link GlyphMastery#PRACTICED}+ is the Glyph Knowledge score (0–7),
  * the second major story gate alongside faction standing. Per-player tracking is handled by
- * {@link net.mayaan.game.magic.GlyphKnowledgeManager}.
+ * {@link GlyphKnowledgeManager}.
+ *
+ * <h2>Anima</h2>
+ * Anima is the life-force of Xibalkaal. Players have an Anima pool that starts at
+ * {@link net.mayaan.game.magic.AnimaSystem#DEFAULT_MAX_ANIMA}. Casting Glyph spells spends
+ * Anima; standing on ley-lines regenerates it faster. Excessive daily use causes Anima Drought.
+ * Per-player tracking is handled by {@link AnimaManager}.
  *
  * <h2>Timeline Echoes</h2>
  * Timeline Echoes are cinematic memory sequences triggered by Glyph Shards and Anima-saturated
  * locations. The 12 major story echoes — from the Prologue's Scout's Warning through
  * Camazotz's final communication in Act III — are defined in {@link TimelineEchoRegistry}.
  *
+ * <h2>Act II Quest Items</h2>
+ * The three {@link net.mayaan.game.item.IxchelicShard Ixchelic Shards} and six of the seven
+ * {@link net.mayaan.game.item.WandererKey Wanderer's Keys} are registered as distinct items
+ * collected throughout the story. All seven keys are needed for the Seven Keys sealing method.
+ *
  * @see MayaanBlocks
  * @see MayaanItems
  * @see net.mayaan.game.biome.MayaanBiomes
  * @see net.mayaan.game.magic.GlyphType
  * @see net.mayaan.game.magic.AnimaSystem
- * @see net.mayaan.game.magic.GlyphKnowledgeManager
+ * @see GlyphKnowledgeManager
+ * @see AnimaManager
  * @see net.mayaan.game.story.StoryManager
  * @see net.mayaan.game.story.StorySpawnHandler
  * @see net.mayaan.game.faction.FactionManager
@@ -93,6 +111,7 @@ public final class MayaanGame {
      *   <li>{@link Faction} — initializes all four surviving factions</li>
      *   <li>{@link GlyphType} / {@link GlyphMastery} — glyph progression enums</li>
      *   <li>{@link TimelineEchoRegistry} — builds all 12 major Timeline Echo sequences</li>
+     *   <li>{@link IxchelicShard.Index} / {@link WandererKey.KeyIndex} — Act II quest enums</li>
      * </ol>
      *
      * <p>Must be called after base game bootstrapping and before any world is loaded.
@@ -116,5 +135,14 @@ public final class MayaanGame {
 
         // Eagerly build all Timeline Echo sequences so they are ready before world load.
         TimelineEchoRegistry.all();
+
+        // Eagerly initialize Act II quest item enums.
+        IxchelicShard.Index.values();
+        WandererKey.KeyIndex.values();
+
+        // Touch singleton managers so they are initialized (though they hold no static
+        // state that needs warming — this just confirms they are classloaded early).
+        AnimaManager.INSTANCE.getClass();
+        GlyphKnowledgeManager.INSTANCE.getClass();
     }
 }

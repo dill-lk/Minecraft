@@ -1,0 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mojang.serialization.Codec
+ *  com.mojang.serialization.MapCodec
+ *  it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap
+ */
+package net.mayaan.world.level.block.state;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+import net.mayaan.core.registries.BuiltInRegistries;
+import net.mayaan.world.level.block.Block;
+import net.mayaan.world.level.block.state.BlockBehaviour;
+import net.mayaan.world.level.block.state.properties.Property;
+
+public class BlockState
+extends BlockBehaviour.BlockStateBase {
+    public static final Codec<BlockState> CODEC = BlockState.codec(BuiltInRegistries.BLOCK.byNameCodec(), Block::defaultBlockState).stable();
+
+    public BlockState(Block owner, Reference2ObjectArrayMap<Property<?>, Comparable<?>> values, MapCodec<BlockState> propertiesCodec) {
+        super(owner, values, propertiesCodec);
+    }
+
+    @Override
+    protected BlockState asState() {
+        return this;
+    }
+}
+

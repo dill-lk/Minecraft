@@ -1,0 +1,42 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.common.collect.ImmutableList
+ */
+package net.mayaan.client.searchtree;
+
+import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import net.mayaan.client.searchtree.IdSearchTree;
+import net.mayaan.client.searchtree.IntersectionIterator;
+import net.mayaan.client.searchtree.MergingUniqueIterator;
+import net.mayaan.client.searchtree.SearchTree;
+import net.mayaan.resources.Identifier;
+
+public class FullTextSearchTree<T>
+extends IdSearchTree<T> {
+    private final SearchTree<T> plainTextSearchTree;
+
+    public FullTextSearchTree(Function<T, Stream<String>> nameGetter, Function<T, Stream<Identifier>> idGetter, List<T> contents) {
+        super(idGetter, contents);
+        this.plainTextSearchTree = SearchTree.plainText(contents, nameGetter);
+    }
+
+    @Override
+    protected List<T> searchPlainText(String text) {
+        return this.plainTextSearchTree.search(text);
+    }
+
+    @Override
+    protected List<T> searchIdentifier(String namespace, String path) {
+        List namespaces = this.identifierSearchTree.searchNamespace(namespace);
+        List paths = this.identifierSearchTree.searchPath(path);
+        List<T> names = this.plainTextSearchTree.search(path);
+        MergingUniqueIterator mergedPathsAndNames = new MergingUniqueIterator(paths.iterator(), names.iterator(), this.additionOrder);
+        return ImmutableList.copyOf(new IntersectionIterator(namespaces.iterator(), mergedPathsAndNames, this.additionOrder));
+    }
+}
+

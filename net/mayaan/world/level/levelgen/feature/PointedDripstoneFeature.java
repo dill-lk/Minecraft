@@ -1,0 +1,74 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mojang.serialization.Codec
+ */
+package net.mayaan.world.level.levelgen.feature;
+
+import com.mojang.serialization.Codec;
+import java.util.Optional;
+import net.mayaan.core.BlockPos;
+import net.mayaan.core.Direction;
+import net.mayaan.util.RandomSource;
+import net.mayaan.world.level.LevelAccessor;
+import net.mayaan.world.level.WorldGenLevel;
+import net.mayaan.world.level.levelgen.feature.DripstoneUtils;
+import net.mayaan.world.level.levelgen.feature.Feature;
+import net.mayaan.world.level.levelgen.feature.FeaturePlaceContext;
+import net.mayaan.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
+
+public class PointedDripstoneFeature
+extends Feature<PointedDripstoneConfiguration> {
+    public PointedDripstoneFeature(Codec<PointedDripstoneConfiguration> codec) {
+        super(codec);
+    }
+
+    @Override
+    public boolean place(FeaturePlaceContext<PointedDripstoneConfiguration> context) {
+        WorldGenLevel level = context.level();
+        BlockPos pos = context.origin();
+        RandomSource random = context.random();
+        PointedDripstoneConfiguration config = context.config();
+        Optional<Direction> tipDirection = PointedDripstoneFeature.getTipDirection(level, pos, random);
+        if (tipDirection.isEmpty()) {
+            return false;
+        }
+        BlockPos rootPos = pos.relative(tipDirection.get().getOpposite());
+        PointedDripstoneFeature.createPatchOfDripstoneBlocks(level, random, rootPos, config);
+        int height = random.nextFloat() < config.chanceOfTallerDripstone && DripstoneUtils.isEmptyOrWater(level.getBlockState(pos.relative(tipDirection.get()))) ? 2 : 1;
+        DripstoneUtils.growPointedDripstone(level, pos, tipDirection.get(), height, false);
+        return true;
+    }
+
+    private static Optional<Direction> getTipDirection(LevelAccessor level, BlockPos pos, RandomSource random) {
+        boolean canPlaceAbove = DripstoneUtils.isDripstoneBase(level.getBlockState(pos.above()));
+        boolean canPlaceBelow = DripstoneUtils.isDripstoneBase(level.getBlockState(pos.below()));
+        if (canPlaceAbove && canPlaceBelow) {
+            return Optional.of(random.nextBoolean() ? Direction.DOWN : Direction.UP);
+        }
+        if (canPlaceAbove) {
+            return Optional.of(Direction.DOWN);
+        }
+        if (canPlaceBelow) {
+            return Optional.of(Direction.UP);
+        }
+        return Optional.empty();
+    }
+
+    private static void createPatchOfDripstoneBlocks(LevelAccessor level, RandomSource random, BlockPos pos, PointedDripstoneConfiguration config) {
+        DripstoneUtils.placeDripstoneBlockIfPossible(level, pos);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            if (random.nextFloat() > config.chanceOfDirectionalSpread) continue;
+            BlockPos pos1 = pos.relative(direction);
+            DripstoneUtils.placeDripstoneBlockIfPossible(level, pos1);
+            if (random.nextFloat() > config.chanceOfSpreadRadius2) continue;
+            BlockPos pos2 = pos1.relative(Direction.getRandom(random));
+            DripstoneUtils.placeDripstoneBlockIfPossible(level, pos2);
+            if (random.nextFloat() > config.chanceOfSpreadRadius3) continue;
+            BlockPos pos3 = pos2.relative(Direction.getRandom(random));
+            DripstoneUtils.placeDripstoneBlockIfPossible(level, pos3);
+        }
+    }
+}
+

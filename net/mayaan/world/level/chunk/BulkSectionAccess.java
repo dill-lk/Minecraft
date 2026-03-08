@@ -1,0 +1,69 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  it.unimi.dsi.fastutil.longs.Long2ObjectMap
+ *  it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
+ *  org.jspecify.annotations.Nullable
+ */
+package net.mayaan.world.level.chunk;
+
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.mayaan.core.BlockPos;
+import net.mayaan.core.SectionPos;
+import net.mayaan.world.level.LevelAccessor;
+import net.mayaan.world.level.block.Blocks;
+import net.mayaan.world.level.block.state.BlockState;
+import net.mayaan.world.level.chunk.ChunkAccess;
+import net.mayaan.world.level.chunk.LevelChunkSection;
+import org.jspecify.annotations.Nullable;
+
+public class BulkSectionAccess
+implements AutoCloseable {
+    private final LevelAccessor level;
+    private final Long2ObjectMap<LevelChunkSection> acquiredSections = new Long2ObjectOpenHashMap();
+    private @Nullable LevelChunkSection lastSection;
+    private long lastSectionKey;
+
+    public BulkSectionAccess(LevelAccessor level) {
+        this.level = level;
+    }
+
+    public @Nullable LevelChunkSection getSection(BlockPos pos) {
+        int sectionIndex = this.level.getSectionIndex(pos.getY());
+        if (sectionIndex < 0 || sectionIndex >= this.level.getSectionsCount()) {
+            return null;
+        }
+        long sectionKey = SectionPos.asLong(pos);
+        if (this.lastSection == null || this.lastSectionKey != sectionKey) {
+            this.lastSection = (LevelChunkSection)this.acquiredSections.computeIfAbsent(sectionKey, key -> {
+                ChunkAccess chunk = this.level.getChunk(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()));
+                LevelChunkSection result = chunk.getSection(sectionIndex);
+                result.acquire();
+                return result;
+            });
+            this.lastSectionKey = sectionKey;
+        }
+        return this.lastSection;
+    }
+
+    public BlockState getBlockState(BlockPos pos) {
+        LevelChunkSection section = this.getSection(pos);
+        if (section == null) {
+            return Blocks.AIR.defaultBlockState();
+        }
+        int sectionRelativeX = SectionPos.sectionRelative(pos.getX());
+        int sectionRelativeY = SectionPos.sectionRelative(pos.getY());
+        int sectionRelativeZ = SectionPos.sectionRelative(pos.getZ());
+        return section.getBlockState(sectionRelativeX, sectionRelativeY, sectionRelativeZ);
+    }
+
+    @Override
+    public void close() {
+        for (LevelChunkSection section : this.acquiredSections.values()) {
+            section.release();
+        }
+    }
+}
+

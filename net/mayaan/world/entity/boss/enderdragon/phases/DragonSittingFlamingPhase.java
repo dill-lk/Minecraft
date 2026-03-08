@@ -1,0 +1,115 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.Nullable
+ */
+package net.mayaan.world.entity.boss.enderdragon.phases;
+
+import net.mayaan.core.BlockPos;
+import net.mayaan.core.particles.ParticleTypes;
+import net.mayaan.core.particles.PowerParticleOption;
+import net.mayaan.server.level.ServerLevel;
+import net.mayaan.util.Mth;
+import net.mayaan.world.effect.MobEffectInstance;
+import net.mayaan.world.effect.MobEffects;
+import net.mayaan.world.entity.AreaEffectCloud;
+import net.mayaan.world.entity.boss.enderdragon.EnderDragon;
+import net.mayaan.world.entity.boss.enderdragon.phases.AbstractDragonSittingPhase;
+import net.mayaan.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.mayaan.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+public class DragonSittingFlamingPhase
+extends AbstractDragonSittingPhase {
+    private static final int FLAME_DURATION = 200;
+    private static final int SITTING_FLAME_ATTACKS_COUNT = 4;
+    private static final int WARMUP_TIME = 10;
+    private int flameTicks;
+    private int flameCount;
+    private @Nullable AreaEffectCloud flame;
+
+    public DragonSittingFlamingPhase(EnderDragon dragon) {
+        super(dragon);
+    }
+
+    @Override
+    public void doClientTick() {
+        ++this.flameTicks;
+        if (this.flameTicks % 2 == 0 && this.flameTicks < 10) {
+            Vec3 look = this.dragon.getHeadLookVector(1.0f).normalize();
+            look.yRot(-0.7853982f);
+            double particleX = this.dragon.head.getX();
+            double particleY = this.dragon.head.getY(0.5);
+            double particleZ = this.dragon.head.getZ();
+            for (int i = 0; i < 8; ++i) {
+                double px = particleX + this.dragon.getRandom().nextGaussian() / 2.0;
+                double py = particleY + this.dragon.getRandom().nextGaussian() / 2.0;
+                double pz = particleZ + this.dragon.getRandom().nextGaussian() / 2.0;
+                for (int j = 0; j < 6; ++j) {
+                    this.dragon.level().addParticle(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0f), px, py, pz, -look.x * (double)0.08f * (double)j, -look.y * (double)0.6f, -look.z * (double)0.08f * (double)j);
+                }
+                look.yRot(0.19634955f);
+            }
+        }
+    }
+
+    @Override
+    public void doServerTick(ServerLevel level) {
+        ++this.flameTicks;
+        if (this.flameTicks >= 200) {
+            if (this.flameCount >= 4) {
+                this.dragon.getPhaseManager().setPhase(EnderDragonPhase.TAKEOFF);
+            } else {
+                this.dragon.getPhaseManager().setPhase(EnderDragonPhase.SITTING_SCANNING);
+            }
+        } else if (this.flameTicks == 10) {
+            double initialY;
+            Vec3 look = new Vec3(this.dragon.head.getX() - this.dragon.getX(), 0.0, this.dragon.head.getZ() - this.dragon.getZ()).normalize();
+            float radius = 5.0f;
+            double x = this.dragon.head.getX() + look.x * 5.0 / 2.0;
+            double z = this.dragon.head.getZ() + look.z * 5.0 / 2.0;
+            double y = initialY = this.dragon.head.getY(0.5);
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, y, z);
+            while (level.isEmptyBlock(pos)) {
+                if ((y -= 1.0) < 0.0) {
+                    y = initialY;
+                    break;
+                }
+                pos.set(x, y, z);
+            }
+            y = Mth.floor(y) + 1;
+            this.flame = new AreaEffectCloud(level, x, y, z);
+            this.flame.setOwner(this.dragon);
+            this.flame.setRadius(5.0f);
+            this.flame.setDuration(200);
+            this.flame.setCustomParticle(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0f));
+            this.flame.setPotionDurationScale(0.25f);
+            this.flame.addEffect(new MobEffectInstance(MobEffects.INSTANT_DAMAGE));
+            level.addFreshEntity(this.flame);
+        }
+    }
+
+    @Override
+    public void begin() {
+        this.flameTicks = 0;
+        ++this.flameCount;
+    }
+
+    @Override
+    public void end() {
+        if (this.flame != null) {
+            this.flame.discard();
+            this.flame = null;
+        }
+    }
+
+    public EnderDragonPhase<DragonSittingFlamingPhase> getPhase() {
+        return EnderDragonPhase.SITTING_FLAMING;
+    }
+
+    public void resetFlameCount() {
+        this.flameCount = 0;
+    }
+}
+

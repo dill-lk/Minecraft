@@ -1,0 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.client.gui.components;
+
+public interface TabOrderedElement {
+    default public int getTabOrderGroup() {
+        return 0;
+    }
+}
+

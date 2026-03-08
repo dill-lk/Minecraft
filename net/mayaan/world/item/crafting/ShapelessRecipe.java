@@ -1,0 +1,80 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mojang.datafixers.kinds.App
+ *  com.mojang.datafixers.kinds.Applicative
+ *  com.mojang.serialization.MapCodec
+ *  com.mojang.serialization.codecs.RecordCodecBuilder
+ */
+package net.mayaan.world.item.crafting;
+
+import com.mojang.datafixers.kinds.App;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
+import net.mayaan.network.RegistryFriendlyByteBuf;
+import net.mayaan.network.codec.ByteBufCodecs;
+import net.mayaan.network.codec.StreamCodec;
+import net.mayaan.world.item.ItemStack;
+import net.mayaan.world.item.ItemStackTemplate;
+import net.mayaan.world.item.Items;
+import net.mayaan.world.item.crafting.CraftingInput;
+import net.mayaan.world.item.crafting.CraftingRecipe;
+import net.mayaan.world.item.crafting.Ingredient;
+import net.mayaan.world.item.crafting.NormalCraftingRecipe;
+import net.mayaan.world.item.crafting.PlacementInfo;
+import net.mayaan.world.item.crafting.Recipe;
+import net.mayaan.world.item.crafting.RecipeSerializer;
+import net.mayaan.world.item.crafting.display.RecipeDisplay;
+import net.mayaan.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
+import net.mayaan.world.item.crafting.display.SlotDisplay;
+import net.mayaan.world.level.Level;
+
+public class ShapelessRecipe
+extends NormalCraftingRecipe {
+    public static final MapCodec<ShapelessRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group((App)Recipe.CommonInfo.MAP_CODEC.forGetter(o -> o.commonInfo), (App)CraftingRecipe.CraftingBookInfo.MAP_CODEC.forGetter(o -> o.bookInfo), (App)ItemStackTemplate.CODEC.fieldOf("result").forGetter(o -> o.result), (App)Ingredient.CODEC.listOf(1, 9).fieldOf("ingredients").forGetter(o -> o.ingredients)).apply((Applicative)i, ShapelessRecipe::new));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ShapelessRecipe> STREAM_CODEC = StreamCodec.composite(Recipe.CommonInfo.STREAM_CODEC, o -> o.commonInfo, CraftingRecipe.CraftingBookInfo.STREAM_CODEC, o -> o.bookInfo, ItemStackTemplate.STREAM_CODEC, o -> o.result, Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()), o -> o.ingredients, ShapelessRecipe::new);
+    public static final RecipeSerializer<ShapelessRecipe> SERIALIZER = new RecipeSerializer<ShapelessRecipe>(MAP_CODEC, STREAM_CODEC);
+    private final ItemStackTemplate result;
+    private final List<Ingredient> ingredients;
+
+    public ShapelessRecipe(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo, ItemStackTemplate result, List<Ingredient> ingredients) {
+        super(commonInfo, bookInfo);
+        this.result = result;
+        this.ingredients = ingredients;
+    }
+
+    @Override
+    public RecipeSerializer<ShapelessRecipe> getSerializer() {
+        return SERIALIZER;
+    }
+
+    @Override
+    protected PlacementInfo createPlacementInfo() {
+        return PlacementInfo.create(this.ingredients);
+    }
+
+    @Override
+    public boolean matches(CraftingInput input, Level level) {
+        if (input.ingredientCount() != this.ingredients.size()) {
+            return false;
+        }
+        if (input.size() == 1 && this.ingredients.size() == 1) {
+            return ((Ingredient)this.ingredients.getFirst()).test(input.getItem(0));
+        }
+        return input.stackedContents().canCraft(this, null);
+    }
+
+    @Override
+    public ItemStack assemble(CraftingInput input) {
+        return this.result.create();
+    }
+
+    @Override
+    public List<RecipeDisplay> display() {
+        return List.of(new ShapelessCraftingRecipeDisplay(this.ingredients.stream().map(Ingredient::display).toList(), new SlotDisplay.ItemStackSlotDisplay(this.result), new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)));
+    }
+}
+

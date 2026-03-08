@@ -1,0 +1,69 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.jspecify.annotations.Nullable
+ */
+package net.mayaan.client.gui.components.tabs;
+
+import java.util.Objects;
+import java.util.function.Consumer;
+import net.mayaan.client.Mayaan;
+import net.mayaan.client.gui.components.AbstractWidget;
+import net.mayaan.client.gui.components.tabs.Tab;
+import net.mayaan.client.gui.navigation.ScreenRectangle;
+import net.mayaan.client.resources.sounds.SimpleSoundInstance;
+import net.mayaan.sounds.SoundEvents;
+import org.jspecify.annotations.Nullable;
+
+public class TabManager {
+    private final Consumer<AbstractWidget> addWidget;
+    private final Consumer<AbstractWidget> removeWidget;
+    private final Consumer<Tab> onSelected;
+    private final Consumer<Tab> onDeselected;
+    private @Nullable Tab currentTab;
+    private @Nullable ScreenRectangle tabArea;
+
+    public TabManager(Consumer<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
+        this(addWidget, removeWidget, t -> {}, t -> {});
+    }
+
+    public TabManager(Consumer<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget, Consumer<Tab> onSelected, Consumer<Tab> onDeselected) {
+        this.addWidget = addWidget;
+        this.removeWidget = removeWidget;
+        this.onSelected = onSelected;
+        this.onDeselected = onDeselected;
+    }
+
+    public void setTabArea(ScreenRectangle tabArea) {
+        this.tabArea = tabArea;
+        Tab tab = this.getCurrentTab();
+        if (tab != null) {
+            tab.doLayout(tabArea);
+        }
+    }
+
+    public void setCurrentTab(Tab tab, boolean playSound) {
+        if (!Objects.equals(this.currentTab, tab)) {
+            if (this.currentTab != null) {
+                this.currentTab.visitChildren(this.removeWidget);
+            }
+            Tab oldTab = this.currentTab;
+            this.currentTab = tab;
+            tab.visitChildren(this.addWidget);
+            if (this.tabArea != null) {
+                tab.doLayout(this.tabArea);
+            }
+            if (playSound) {
+                Mayaan.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
+            }
+            this.onDeselected.accept(oldTab);
+            this.onSelected.accept(this.currentTab);
+        }
+    }
+
+    public @Nullable Tab getCurrentTab() {
+        return this.currentTab;
+    }
+}
+

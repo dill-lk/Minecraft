@@ -1,0 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.client.gui.screens;
+
+import net.mayaan.client.gui.GuiGraphics;
+import net.mayaan.client.gui.components.Button;
+import net.mayaan.client.gui.screens.Screen;
+import net.mayaan.network.chat.CommonComponents;
+import net.mayaan.network.chat.Component;
+
+public class ErrorScreen
+extends Screen {
+    private final Component message;
+
+    public ErrorScreen(Component title, Component message) {
+        super(title);
+        this.message = message;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(null)).bounds(this.width / 2 - 100, 140, 200, 20).build());
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float a) {
+        super.render(graphics, mouseX, mouseY, a);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 90, -1);
+        graphics.drawCenteredString(this.font, this.message, this.width / 2, 110, -1);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float a) {
+        graphics.fillGradient(0, 0, this.width, this.height, -12574688, -11530224);
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return false;
+    }
+}
+

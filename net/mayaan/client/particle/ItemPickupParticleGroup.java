@@ -1,0 +1,60 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.client.particle;
+
+import com.maayanlabs.blaze3d.vertex.PoseStack;
+import java.util.List;
+import net.mayaan.client.Camera;
+import net.mayaan.client.Mayaan;
+import net.mayaan.client.particle.ItemPickupParticle;
+import net.mayaan.client.particle.ParticleEngine;
+import net.mayaan.client.particle.ParticleGroup;
+import net.mayaan.client.renderer.SubmitNodeCollector;
+import net.mayaan.client.renderer.culling.Frustum;
+import net.mayaan.client.renderer.entity.EntityRenderDispatcher;
+import net.mayaan.client.renderer.entity.state.EntityRenderState;
+import net.mayaan.client.renderer.state.level.CameraRenderState;
+import net.mayaan.client.renderer.state.level.ParticleGroupRenderState;
+import net.mayaan.util.Mth;
+import net.mayaan.world.phys.Vec3;
+
+public class ItemPickupParticleGroup
+extends ParticleGroup<ItemPickupParticle> {
+    public ItemPickupParticleGroup(ParticleEngine engine) {
+        super(engine);
+    }
+
+    @Override
+    public ParticleGroupRenderState extractRenderState(Frustum frustum, Camera camera, float partialTickTime) {
+        return new State(this.particles.stream().map(particle -> ParticleInstance.fromParticle(particle, camera, partialTickTime)).toList());
+    }
+
+    private record State(List<ParticleInstance> instances) implements ParticleGroupRenderState
+    {
+        @Override
+        public void submit(SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+            PoseStack poseStack = new PoseStack();
+            EntityRenderDispatcher entityRenderDispatcher = Mayaan.getInstance().getEntityRenderDispatcher();
+            for (ParticleInstance instance : this.instances) {
+                entityRenderDispatcher.submit(instance.itemRenderState, camera, instance.xOffset, instance.yOffset, instance.zOffset, poseStack, submitNodeCollector);
+            }
+        }
+    }
+
+    private record ParticleInstance(EntityRenderState itemRenderState, double xOffset, double yOffset, double zOffset) {
+        public static ParticleInstance fromParticle(ItemPickupParticle particle, Camera camera, float partialTickTime) {
+            float time = ((float)particle.life + partialTickTime) / 3.0f;
+            time *= time;
+            double xt = Mth.lerp((double)partialTickTime, particle.targetXOld, particle.targetX);
+            double yt = Mth.lerp((double)partialTickTime, particle.targetYOld, particle.targetY);
+            double zt = Mth.lerp((double)partialTickTime, particle.targetZOld, particle.targetZ);
+            double xx = Mth.lerp((double)time, particle.itemRenderState.x, xt);
+            double yy = Mth.lerp((double)time, particle.itemRenderState.y, yt);
+            double zz = Mth.lerp((double)time, particle.itemRenderState.z, zt);
+            Vec3 pos = camera.position();
+            return new ParticleInstance(particle.itemRenderState, xx - pos.x(), yy - pos.y(), zz - pos.z());
+        }
+    }
+}
+

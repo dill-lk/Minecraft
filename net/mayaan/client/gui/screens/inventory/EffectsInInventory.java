@@ -1,0 +1,114 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.google.common.collect.Ordering
+ */
+package net.mayaan.client.gui.screens.inventory;
+
+import com.google.common.collect.Ordering;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import net.mayaan.client.Mayaan;
+import net.mayaan.client.gui.Font;
+import net.mayaan.client.gui.Gui;
+import net.mayaan.client.gui.GuiGraphics;
+import net.mayaan.client.gui.components.StringWidget;
+import net.mayaan.client.gui.screens.inventory.AbstractContainerScreen;
+import net.mayaan.client.renderer.RenderPipelines;
+import net.mayaan.network.chat.CommonComponents;
+import net.mayaan.network.chat.Component;
+import net.mayaan.network.chat.MutableComponent;
+import net.mayaan.resources.Identifier;
+import net.mayaan.util.FormattedCharSequence;
+import net.mayaan.world.effect.MobEffectInstance;
+import net.mayaan.world.effect.MobEffectUtil;
+
+public class EffectsInInventory {
+    private static final Identifier EFFECT_BACKGROUND_SPRITE = Identifier.withDefaultNamespace("container/inventory/effect_background");
+    private static final Identifier EFFECT_BACKGROUND_AMBIENT_SPRITE = Identifier.withDefaultNamespace("container/inventory/effect_background_ambient");
+    private static final int ICON_SIZE = 18;
+    public static final int SPACING = 7;
+    private static final int TEXT_X_OFFSET = 32;
+    public static final int SPRITE_SQUARE_SIZE = 32;
+    private final AbstractContainerScreen<?> screen;
+    private final Mayaan minecraft;
+
+    public EffectsInInventory(AbstractContainerScreen<?> screen) {
+        this.screen = screen;
+        this.minecraft = Mayaan.getInstance();
+    }
+
+    public boolean canSeeEffects() {
+        int xo = this.screen.leftPos + this.screen.imageWidth + 2;
+        int availableWidth = this.screen.width - xo;
+        return availableWidth >= 32;
+    }
+
+    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
+        int xo = this.screen.leftPos + this.screen.imageWidth + 2;
+        int availableWidth = this.screen.width - xo;
+        Collection<MobEffectInstance> activeEffects = this.minecraft.player.getActiveEffects();
+        if (activeEffects.isEmpty() || availableWidth < 32) {
+            return;
+        }
+        int maxWidth = availableWidth >= 120 ? availableWidth - 7 : 32;
+        int yStep = 33;
+        if (activeEffects.size() > 5) {
+            yStep = 132 / (activeEffects.size() - 1);
+        }
+        this.renderEffects(graphics, activeEffects, xo, yStep, mouseX, mouseY, maxWidth);
+    }
+
+    private void renderEffects(GuiGraphics graphics, Collection<MobEffectInstance> activeEffects, int x0, int yStep, int mouseX, int mouseY, int maxWidth) {
+        List sortedEffects = Ordering.natural().sortedCopy(activeEffects);
+        int y0 = this.screen.topPos;
+        Font font = this.screen.getFont();
+        for (MobEffectInstance effect : sortedEffects) {
+            boolean isAmbient = effect.isAmbient();
+            Component effectText = this.getEffectName(effect);
+            Component duration = MobEffectUtil.formatDuration(effect, 1.0f, this.minecraft.level.tickRateManager().tickrate());
+            int textureWidth = this.renderBackground(graphics, font, effectText, duration, x0, y0, isAmbient, maxWidth);
+            this.renderText(graphics, effectText, duration, font, x0, y0, textureWidth, yStep, mouseX, mouseY);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Gui.getMobEffectSprite(effect.getEffect()), x0 + 7, y0 + 7, 18, 18);
+            y0 += yStep;
+        }
+    }
+
+    private int renderBackground(GuiGraphics graphics, Font font, Component effectName, Component duration, int x0, int y0, boolean isAmbient, int maxTextureWidth) {
+        int nameWidth = 32 + font.width(effectName) + 7;
+        int durationWidth = 32 + font.width(duration) + 7;
+        int textureWidth = Math.min(maxTextureWidth, Math.max(nameWidth, durationWidth));
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, isAmbient ? EFFECT_BACKGROUND_AMBIENT_SPRITE : EFFECT_BACKGROUND_SPRITE, x0, y0, textureWidth, 32);
+        return textureWidth;
+    }
+
+    private void renderText(GuiGraphics graphics, Component effectText, Component duration, Font font, int x0, int y0, int textureWidth, int yStep, int mouseX, int mouseY) {
+        boolean isCompact;
+        int textX = x0 + 32;
+        int textY = y0 + 7;
+        int maxTextWidth = textureWidth - 32 - 7;
+        if (maxTextWidth > 0) {
+            boolean shouldClip = font.width(effectText) > maxTextWidth;
+            FormattedCharSequence clippedText = shouldClip ? StringWidget.clipText(effectText, font, maxTextWidth) : effectText.getVisualOrderText();
+            graphics.drawString(font, clippedText, textX, textY, -1);
+            graphics.drawString(font, duration, textX, textY + font.lineHeight, -8355712);
+            isCompact = shouldClip;
+        } else {
+            isCompact = true;
+        }
+        if (isCompact && mouseX >= x0 && mouseX <= x0 + textureWidth && mouseY >= y0 && mouseY <= y0 + yStep) {
+            graphics.setTooltipForNextFrame(this.screen.getFont(), List.of(effectText, duration), Optional.empty(), mouseX, mouseY);
+        }
+    }
+
+    private Component getEffectName(MobEffectInstance effect) {
+        MutableComponent name = effect.getEffect().value().getDisplayName().copy();
+        if (effect.getAmplifier() >= 1 && effect.getAmplifier() <= 9) {
+            name.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + (effect.getAmplifier() + 1)));
+        }
+        return name;
+    }
+}
+

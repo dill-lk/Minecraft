@@ -1,0 +1,58 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.client.gui.screens.inventory;
+
+import java.util.List;
+import net.mayaan.client.gui.GuiGraphics;
+import net.mayaan.client.gui.navigation.ScreenPosition;
+import net.mayaan.client.gui.screens.inventory.AbstractRecipeBookScreen;
+import net.mayaan.client.gui.screens.recipebook.FurnaceRecipeBookComponent;
+import net.mayaan.client.gui.screens.recipebook.RecipeBookComponent;
+import net.mayaan.client.renderer.RenderPipelines;
+import net.mayaan.network.chat.Component;
+import net.mayaan.resources.Identifier;
+import net.mayaan.util.Mth;
+import net.mayaan.world.entity.player.Inventory;
+import net.mayaan.world.inventory.AbstractFurnaceMenu;
+
+public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu>
+extends AbstractRecipeBookScreen<T> {
+    private final Identifier texture;
+    private final Identifier litProgressSprite;
+    private final Identifier burnProgressSprite;
+
+    public AbstractFurnaceScreen(T menu, Inventory inventory, Component title, Component recipeFilterName, Identifier texture, Identifier litProgressSprite, Identifier burnProgressSprite, List<RecipeBookComponent.TabInfo> tabInfos) {
+        super(menu, new FurnaceRecipeBookComponent((AbstractFurnaceMenu)menu, recipeFilterName, tabInfos), inventory, title);
+        this.texture = texture;
+        this.litProgressSprite = litProgressSprite;
+        this.burnProgressSprite = burnProgressSprite;
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
+    }
+
+    @Override
+    protected ScreenPosition getRecipeBookButtonPosition() {
+        return new ScreenPosition(this.leftPos + 20, this.height / 2 - 49);
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics graphics, float a, int xm, int ym) {
+        int xo = this.leftPos;
+        int yo = this.topPos;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, this.texture, xo, yo, 0.0f, 0.0f, this.imageWidth, this.imageHeight, 256, 256);
+        if (((AbstractFurnaceMenu)this.menu).isLit()) {
+            int litSpriteHeight = 14;
+            int litProgressHeight = Mth.ceil(((AbstractFurnaceMenu)this.menu).getLitProgress() * 13.0f) + 1;
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.litProgressSprite, 14, 14, 0, 14 - litProgressHeight, xo + 56, yo + 36 + 14 - litProgressHeight, 14, litProgressHeight);
+        }
+        int burnSpriteWidth = 24;
+        int burnProgressWidth = Mth.ceil(((AbstractFurnaceMenu)this.menu).getBurnProgress() * 24.0f);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.burnProgressSprite, 24, 16, 0, 0, xo + 79, yo + 34, burnProgressWidth, 16);
+    }
+}
+

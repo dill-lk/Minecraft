@@ -1,0 +1,115 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.client.renderer.feature;
+
+import net.mayaan.client.gui.Font;
+import net.mayaan.client.renderer.MultiBufferSource;
+import net.mayaan.client.renderer.OutlineBufferSource;
+import net.mayaan.client.renderer.SubmitNodeCollection;
+import net.mayaan.client.renderer.SubmitNodeStorage;
+import net.mayaan.client.renderer.block.BlockRenderDispatcher;
+import net.mayaan.client.renderer.feature.BlockFeatureRenderer;
+import net.mayaan.client.renderer.feature.CustomFeatureRenderer;
+import net.mayaan.client.renderer.feature.FlameFeatureRenderer;
+import net.mayaan.client.renderer.feature.ItemFeatureRenderer;
+import net.mayaan.client.renderer.feature.LeashFeatureRenderer;
+import net.mayaan.client.renderer.feature.ModelFeatureRenderer;
+import net.mayaan.client.renderer.feature.ModelPartFeatureRenderer;
+import net.mayaan.client.renderer.feature.NameTagFeatureRenderer;
+import net.mayaan.client.renderer.feature.ParticleFeatureRenderer;
+import net.mayaan.client.renderer.feature.ShadowFeatureRenderer;
+import net.mayaan.client.renderer.feature.TextFeatureRenderer;
+import net.mayaan.client.renderer.state.GameRenderState;
+import net.mayaan.client.resources.model.sprite.AtlasManager;
+
+public class FeatureRenderDispatcher
+implements AutoCloseable {
+    private final SubmitNodeStorage submitNodeStorage;
+    private final BlockRenderDispatcher blockRenderDispatcher;
+    private final MultiBufferSource.BufferSource bufferSource;
+    private final AtlasManager atlasManager;
+    private final OutlineBufferSource outlineBufferSource;
+    private final MultiBufferSource.BufferSource crumblingBufferSource;
+    private final Font font;
+    private final GameRenderState gameRenderState;
+    private final ShadowFeatureRenderer shadowFeatureRenderer = new ShadowFeatureRenderer();
+    private final FlameFeatureRenderer flameFeatureRenderer = new FlameFeatureRenderer();
+    private final ModelFeatureRenderer modelFeatureRenderer = new ModelFeatureRenderer();
+    private final ModelPartFeatureRenderer modelPartFeatureRenderer = new ModelPartFeatureRenderer();
+    private final NameTagFeatureRenderer nameTagFeatureRenderer = new NameTagFeatureRenderer();
+    private final TextFeatureRenderer textFeatureRenderer = new TextFeatureRenderer();
+    private final LeashFeatureRenderer leashFeatureRenderer = new LeashFeatureRenderer();
+    private final ItemFeatureRenderer itemFeatureRenderer = new ItemFeatureRenderer();
+    private final CustomFeatureRenderer customFeatureRenderer = new CustomFeatureRenderer();
+    private final BlockFeatureRenderer blockFeatureRenderer = new BlockFeatureRenderer();
+    private final ParticleFeatureRenderer particleFeatureRenderer = new ParticleFeatureRenderer();
+
+    public FeatureRenderDispatcher(SubmitNodeStorage submitNodeStorage, BlockRenderDispatcher blockRenderDispatcher, MultiBufferSource.BufferSource bufferSource, AtlasManager atlasManager, OutlineBufferSource outlineBufferSource, MultiBufferSource.BufferSource crumblingBufferSource, Font font, GameRenderState gameRenderState) {
+        this.submitNodeStorage = submitNodeStorage;
+        this.blockRenderDispatcher = blockRenderDispatcher;
+        this.bufferSource = bufferSource;
+        this.atlasManager = atlasManager;
+        this.outlineBufferSource = outlineBufferSource;
+        this.crumblingBufferSource = crumblingBufferSource;
+        this.font = font;
+        this.gameRenderState = gameRenderState;
+    }
+
+    public void renderSolidFeatures() {
+        for (SubmitNodeCollection collection : this.submitNodeStorage.getSubmitsPerOrder().values()) {
+            this.modelFeatureRenderer.renderSolid(collection, this.bufferSource, this.outlineBufferSource, this.crumblingBufferSource);
+            this.modelPartFeatureRenderer.renderSolid(collection, this.bufferSource, this.outlineBufferSource, this.crumblingBufferSource);
+            this.flameFeatureRenderer.renderSolid(collection, this.bufferSource, this.atlasManager);
+            this.leashFeatureRenderer.renderSolid(collection, this.bufferSource);
+            this.itemFeatureRenderer.renderSolid(collection, this.bufferSource, this.outlineBufferSource);
+            this.blockFeatureRenderer.renderSolid(collection, this.bufferSource, this.blockRenderDispatcher, this.outlineBufferSource, this.gameRenderState.optionsRenderState);
+            this.customFeatureRenderer.renderSolid(collection, this.bufferSource);
+            this.particleFeatureRenderer.renderSolid(collection);
+        }
+    }
+
+    public void renderTranslucentFeatures() {
+        for (SubmitNodeCollection collection : this.submitNodeStorage.getSubmitsPerOrder().values()) {
+            this.shadowFeatureRenderer.renderTranslucent(collection, this.bufferSource);
+            this.modelFeatureRenderer.renderTranslucent(collection, this.bufferSource, this.outlineBufferSource, this.crumblingBufferSource);
+            this.modelPartFeatureRenderer.renderTranslucent(collection, this.bufferSource, this.outlineBufferSource, this.crumblingBufferSource);
+            this.nameTagFeatureRenderer.renderTranslucent(collection, this.bufferSource, this.font);
+            this.textFeatureRenderer.renderTranslucent(collection, this.bufferSource);
+            this.itemFeatureRenderer.renderTranslucent(collection, this.bufferSource, this.outlineBufferSource);
+            this.blockFeatureRenderer.renderTranslucent(collection, this.bufferSource, this.blockRenderDispatcher, this.outlineBufferSource, this.gameRenderState.optionsRenderState);
+            this.customFeatureRenderer.renderTranslucent(collection, this.bufferSource);
+        }
+    }
+
+    public void renderTranslucentParticles() {
+        for (SubmitNodeCollection collection : this.submitNodeStorage.getSubmitsPerOrder().values()) {
+            this.particleFeatureRenderer.renderTranslucent(collection);
+        }
+    }
+
+    public void clearSubmitNodes() {
+        this.submitNodeStorage.clear();
+    }
+
+    public void renderAllFeatures() {
+        this.renderSolidFeatures();
+        this.renderTranslucentFeatures();
+        this.renderTranslucentParticles();
+        this.clearSubmitNodes();
+    }
+
+    public void endFrame() {
+        this.particleFeatureRenderer.endFrame();
+    }
+
+    public SubmitNodeStorage getSubmitNodeStorage() {
+        return this.submitNodeStorage;
+    }
+
+    @Override
+    public void close() {
+        this.particleFeatureRenderer.close();
+    }
+}
+

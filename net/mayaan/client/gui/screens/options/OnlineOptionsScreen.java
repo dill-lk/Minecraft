@@ -1,0 +1,64 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.mojang.datafixers.util.Unit
+ *  com.mojang.serialization.Codec
+ *  org.jspecify.annotations.Nullable
+ */
+package net.mayaan.client.gui.screens.options;
+
+import com.mojang.datafixers.util.Unit;
+import com.mojang.serialization.Codec;
+import java.util.ArrayList;
+import java.util.List;
+import net.mayaan.Optionull;
+import net.mayaan.client.Mayaan;
+import net.mayaan.client.OptionInstance;
+import net.mayaan.client.Options;
+import net.mayaan.client.gui.components.AbstractWidget;
+import net.mayaan.client.gui.screens.Screen;
+import net.mayaan.client.gui.screens.options.OptionsSubScreen;
+import net.mayaan.network.chat.Component;
+import net.mayaan.world.Difficulty;
+import org.jspecify.annotations.Nullable;
+
+public class OnlineOptionsScreen
+extends OptionsSubScreen {
+    private static final Component TITLE = Component.translatable("options.online.title");
+    private @Nullable OptionInstance<Unit> difficultyDisplay;
+
+    public OnlineOptionsScreen(Screen lastScreen, Options options) {
+        super(lastScreen, options, TITLE);
+    }
+
+    @Override
+    protected void init() {
+        AbstractWidget difficultyButton;
+        super.init();
+        if (this.difficultyDisplay != null && (difficultyButton = this.list.findOption(this.difficultyDisplay)) != null) {
+            difficultyButton.active = false;
+        }
+    }
+
+    private OptionInstance<?>[] options(Options options, Mayaan minecraft) {
+        ArrayList<OptionInstance> optionList = new ArrayList<OptionInstance>();
+        optionList.add(options.realmsNotifications());
+        optionList.add(options.allowServerListing());
+        OptionInstance difficultyDisplay = Optionull.map(minecraft.level, level -> {
+            Difficulty difficulty = level.getDifficulty();
+            return new OptionInstance<Unit>("options.difficulty.online", OptionInstance.noTooltip(), (caption, value) -> difficulty.getDisplayName(), new OptionInstance.Enum<Unit>(List.of(Unit.INSTANCE), Codec.EMPTY.codec()), Unit.INSTANCE, value -> {});
+        });
+        if (difficultyDisplay != null) {
+            this.difficultyDisplay = difficultyDisplay;
+            optionList.add(difficultyDisplay);
+        }
+        return optionList.toArray(new OptionInstance[0]);
+    }
+
+    @Override
+    protected void addOptions() {
+        this.list.addSmall(this.options(this.options, this.minecraft));
+    }
+}
+

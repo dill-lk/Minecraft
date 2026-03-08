@@ -1,0 +1,110 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package net.mayaan.data.worldgen.placement;
+
+import java.util.List;
+import net.mayaan.core.BlockPos;
+import net.mayaan.core.Holder;
+import net.mayaan.core.registries.Registries;
+import net.mayaan.data.worldgen.BootstrapContext;
+import net.mayaan.data.worldgen.placement.AquaticPlacements;
+import net.mayaan.data.worldgen.placement.CavePlacements;
+import net.mayaan.data.worldgen.placement.EndPlacements;
+import net.mayaan.data.worldgen.placement.MiscOverworldPlacements;
+import net.mayaan.data.worldgen.placement.NetherPlacements;
+import net.mayaan.data.worldgen.placement.OrePlacements;
+import net.mayaan.data.worldgen.placement.TreePlacements;
+import net.mayaan.data.worldgen.placement.VegetationPlacements;
+import net.mayaan.data.worldgen.placement.VillagePlacements;
+import net.mayaan.resources.Identifier;
+import net.mayaan.resources.ResourceKey;
+import net.mayaan.util.random.WeightedList;
+import net.mayaan.util.valueproviders.ConstantInt;
+import net.mayaan.util.valueproviders.IntProvider;
+import net.mayaan.util.valueproviders.WeightedListInt;
+import net.mayaan.world.level.block.Block;
+import net.mayaan.world.level.levelgen.Heightmap;
+import net.mayaan.world.level.levelgen.VerticalAnchor;
+import net.mayaan.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.mayaan.world.level.levelgen.feature.ConfiguredFeature;
+import net.mayaan.world.level.levelgen.feature.Feature;
+import net.mayaan.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.mayaan.world.level.levelgen.placement.BlockPredicateFilter;
+import net.mayaan.world.level.levelgen.placement.CountPlacement;
+import net.mayaan.world.level.levelgen.placement.HeightRangePlacement;
+import net.mayaan.world.level.levelgen.placement.HeightmapPlacement;
+import net.mayaan.world.level.levelgen.placement.PlacedFeature;
+import net.mayaan.world.level.levelgen.placement.PlacementFilter;
+import net.mayaan.world.level.levelgen.placement.PlacementModifier;
+
+public class PlacementUtils {
+    public static final PlacementModifier HEIGHTMAP = HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING);
+    public static final PlacementModifier HEIGHTMAP_NO_LEAVES = HeightmapPlacement.onHeightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES);
+    public static final PlacementModifier HEIGHTMAP_TOP_SOLID = HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR_WG);
+    public static final PlacementModifier HEIGHTMAP_WORLD_SURFACE = HeightmapPlacement.onHeightmap(Heightmap.Types.WORLD_SURFACE_WG);
+    public static final PlacementModifier HEIGHTMAP_OCEAN_FLOOR = HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR);
+    public static final PlacementModifier FULL_RANGE = HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.top());
+    public static final PlacementModifier RANGE_10_10 = HeightRangePlacement.uniform(VerticalAnchor.aboveBottom(10), VerticalAnchor.belowTop(10));
+    public static final PlacementModifier RANGE_8_8 = HeightRangePlacement.uniform(VerticalAnchor.aboveBottom(8), VerticalAnchor.belowTop(8));
+    public static final PlacementModifier RANGE_4_4 = HeightRangePlacement.uniform(VerticalAnchor.aboveBottom(4), VerticalAnchor.belowTop(4));
+    public static final PlacementModifier RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT = HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(256));
+
+    public static void bootstrap(BootstrapContext<PlacedFeature> context) {
+        AquaticPlacements.bootstrap(context);
+        CavePlacements.bootstrap(context);
+        EndPlacements.bootstrap(context);
+        MiscOverworldPlacements.bootstrap(context);
+        NetherPlacements.bootstrap(context);
+        OrePlacements.bootstrap(context);
+        TreePlacements.bootstrap(context);
+        VegetationPlacements.bootstrap(context);
+        VillagePlacements.bootstrap(context);
+    }
+
+    public static ResourceKey<PlacedFeature> createKey(String name) {
+        return ResourceKey.create(Registries.PLACED_FEATURE, Identifier.withDefaultNamespace(name));
+    }
+
+    public static void register(BootstrapContext<PlacedFeature> context, ResourceKey<PlacedFeature> id, Holder<ConfiguredFeature<?, ?>> feature, List<PlacementModifier> placementModifiers) {
+        context.register(id, new PlacedFeature(feature, List.copyOf(placementModifiers)));
+    }
+
+    public static void register(BootstrapContext<PlacedFeature> context, ResourceKey<PlacedFeature> id, Holder<ConfiguredFeature<?, ?>> feature, PlacementModifier ... placementModifiers) {
+        PlacementUtils.register(context, id, feature, List.of(placementModifiers));
+    }
+
+    public static PlacementModifier countExtra(int count, float chance, int extra) {
+        float weight = 1.0f / chance;
+        if (Math.abs(weight - (float)((int)weight)) > 1.0E-5f) {
+            throw new IllegalStateException("Chance data cannot be represented as list weight");
+        }
+        WeightedList<IntProvider> distribution = WeightedList.builder().add(ConstantInt.of(count), (int)weight - 1).add(ConstantInt.of(count + extra), 1).build();
+        return CountPlacement.of(new WeightedListInt(distribution));
+    }
+
+    public static PlacementFilter isEmpty() {
+        return BlockPredicateFilter.forPredicate(BlockPredicate.ONLY_IN_AIR_PREDICATE);
+    }
+
+    public static BlockPredicateFilter filteredByBlockSurvival(Block block) {
+        return BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(block.defaultBlockState(), BlockPos.ZERO));
+    }
+
+    public static Holder<PlacedFeature> inlinePlaced(Holder<ConfiguredFeature<?, ?>> configuredFeature, PlacementModifier ... placedFeatures) {
+        return Holder.direct(new PlacedFeature(configuredFeature, List.of(placedFeatures)));
+    }
+
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<PlacedFeature> inlinePlaced(F feature, FC config, PlacementModifier ... placedFeatures) {
+        return PlacementUtils.inlinePlaced(Holder.direct(new ConfiguredFeature<FC, F>(feature, config)), placedFeatures);
+    }
+
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<PlacedFeature> onlyWhenEmpty(F feature, FC config) {
+        return PlacementUtils.filtered(feature, config, BlockPredicate.ONLY_IN_AIR_PREDICATE);
+    }
+
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<PlacedFeature> filtered(F feature, FC config, BlockPredicate predicate) {
+        return PlacementUtils.inlinePlaced(feature, config, BlockPredicateFilter.forPredicate(predicate));
+    }
+}
+

@@ -10,6 +10,7 @@ import net.mayaan.game.magic.GlyphCasting;
 import net.mayaan.game.magic.GlyphKnowledgeManager;
 import net.mayaan.game.magic.GlyphMastery;
 import net.mayaan.game.magic.GlyphType;
+import net.mayaan.game.npc.MayaanNpcs;
 import net.mayaan.game.story.StoryChapter;
 
 /**
@@ -29,6 +30,11 @@ import net.mayaan.game.story.StoryChapter;
  *   <li>{@link GlyphType} / {@link GlyphMastery} — glyph type and mastery tier enums</li>
  *   <li>{@link TimelineEchoRegistry} — all 12 major story Timeline Echoes</li>
  *   <li>{@link IxchelicShard.Index} / {@link WandererKey.KeyIndex} — Act II quest item enums</li>
+ *   <li>{@link MayaanSounds} — sound events for all Mayaan entities, glyph casts, and blocks</li>
+ *   <li>{@link MayaanParticles} — particle types for Anima, glyph trails, creatures, and echoes</li>
+ *   <li>{@link MayaanMobEffects} — mob effects: Anima Slow, Bloom Haze, Void Disorientation, etc.</li>
+ *   <li>{@link MayaanDamageTypes} — damage type resource keys for Anima Drain, Void Touch, etc.</li>
+ *   <li>{@link MayaanNpcs} — NPC entries for all 8 named characters with full dialogue scripts</li>
  * </ol>
  *
  * <h2>The story of Mayaan</h2>
@@ -151,6 +157,17 @@ public final class MayaanGame {
 
         // Eagerly initialize dimension registry.
         MayaanDimensions.class.getName();
+
+        // Eagerly register sounds, particles, and mob effects so they are available
+        // at world load and before any sound/particle/effect lookup.
+        MayaanSounds.class.getName();
+        MayaanParticles.class.getName();
+        MayaanMobEffects.class.getName();
+        // MayaanDamageTypes only declares ResourceKeys — no registration call needed.
+        MayaanDamageTypes.class.getName();
+
+        // Eagerly initialize all NPC entries so dialogue scripts are compiled at startup.
+        MayaanNpcs.class.getName();
 
         // Touch singleton managers so they are initialized (though they hold no static
         // state that needs warming — this just confirms they are classloaded early).

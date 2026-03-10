@@ -55,6 +55,9 @@ public final class AnimaBarHudRenderer implements ContextualBarRenderer {
     /** Maximum possible Glyph Knowledge score (one point per {@link net.mayaan.game.magic.GlyphType}). */
     private static final int MAX_GLYPH_KNOWLEDGE_SCORE = 7;
 
+    /** Unicode black-square symbol used as the drought indicator icon in HUD text. */
+    private static final String DROUGHT_ICON = "\u25a0";
+
     private final Mayaan minecraft;
 
     public AnimaBarHudRenderer(Mayaan minecraft) {
@@ -116,7 +119,7 @@ public final class AnimaBarHudRenderer implements ContextualBarRenderer {
         // "ANIMA XX/YY" on the left side above the bar
         boolean drought = data.isInDrought();
         String animaText = "ANIMA " + (int) data.getCurrentAnima() + "/" + data.getMaxAnima()
-                + (drought ? " \u25a0DROUGHT" : ""); // ■ DROUGHT
+                + (drought ? " " + DROUGHT_ICON + "DROUGHT" : "");
         int labelY = top - font.lineHeight - 1;
         graphics.drawString(font, animaText, left, labelY,
                 drought ? TINT_DROUGHT : TINT_NORMAL, true);

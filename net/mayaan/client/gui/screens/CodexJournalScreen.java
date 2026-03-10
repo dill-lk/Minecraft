@@ -128,7 +128,7 @@ public final class CodexJournalScreen extends Screen {
                     ARGB.color(200, 255, 255, 255));
 
             // Glyph label (abbreviated)
-            String abbr = type.getId().substring(0, Math.min(GLYPH_ABBR_LENGTH, type.getId().length())).toUpperCase();
+            String abbr = glyphAbbreviation(type);
             int textX = pipX + (PIP_W - this.font.width(abbr)) / 2;
             int textY = y + (PIP_H - this.font.lineHeight) / 2;
             graphics.drawString(this.font, abbr, textX, textY, 0xFFFFFFFF, false);
@@ -179,6 +179,18 @@ public final class CodexJournalScreen extends Screen {
             case INSCRIBED -> PIP_INSCRIBED;
             default -> PIP_UNLEARNED;
         };
+    }
+
+    /**
+     * Returns a short uppercase abbreviation for the given glyph type, suitable for
+     * use as a pip label in the Codex Journal.
+     *
+     * @param type the glyph type to abbreviate
+     * @return up to {@link #GLYPH_ABBR_LENGTH} uppercase characters
+     */
+    private static String glyphAbbreviation(GlyphType type) {
+        String id = type.getId();
+        return id.substring(0, Math.min(GLYPH_ABBR_LENGTH, id.length())).toUpperCase();
     }
 
     private void renderLegendEntry(GuiGraphics graphics, int x, int y, int colour, String label) {

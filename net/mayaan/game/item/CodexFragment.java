@@ -2,11 +2,15 @@ package net.mayaan.game.item;
 
 import java.util.function.Consumer;
 import net.mayaan.network.chat.Component;
+import net.mayaan.world.InteractionHand;
+import net.mayaan.world.InteractionResult;
+import net.mayaan.world.entity.player.Player;
 import net.mayaan.world.item.Item;
 import net.mayaan.world.item.ItemStack;
 import net.mayaan.world.item.Rarity;
 import net.mayaan.world.item.TooltipFlag;
 import net.mayaan.world.item.component.TooltipDisplay;
+import net.mayaan.world.level.Level;
 
 /**
  * Codex Fragment — a preserved record of Mayaan knowledge, found in ruins,
@@ -112,6 +116,21 @@ public final class CodexFragment extends Item {
      */
     public int getRequiredKnowledgeScore() {
         return requiredKnowledgeScore;
+    }
+
+    // ── Right-click: open the reading screen ─────────────────────────────────
+
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (!level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        int score = net.mayaan.client.ClientMayaanData.INSTANCE.getKnowledgeScore();
+        boolean canRead = score >= requiredKnowledgeScore;
+        net.mayaan.client.Mayaan.getInstance()
+                .setScreen(new net.mayaan.client.gui.screens.CodexReadScreen(
+                        fragmentId, category, canRead));
+        return InteractionResult.SUCCESS;
     }
 
     @Override

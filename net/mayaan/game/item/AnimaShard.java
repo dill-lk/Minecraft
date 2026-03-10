@@ -48,7 +48,7 @@ public class AnimaShard extends Item {
         }
 
         PlayerAnimaData data = AnimaManager.INSTANCE.getAnimaData(serverPlayer.getUUID());
-        if (data.getCurrentAnima() >= data.getMaxAnima()) {
+        if (data.isFull()) {
             serverPlayer.sendSystemMessage(Component.translatable(
                     "item.mayaan.anima_shard.full"));
             return InteractionResult.FAIL;

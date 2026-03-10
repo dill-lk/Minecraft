@@ -134,6 +134,13 @@ public final class PlayerAnimaData {
     }
 
     /**
+     * Returns {@code true} if the player's Anima pool is at maximum capacity.
+     */
+    public boolean isFull() {
+        return currentAnima >= maxAnima;
+    }
+
+    /**
      * Returns {@code true} if the player has enough current Anima to cover {@code cost}.
      *
      * @param cost the Anima cost to check (non-negative)

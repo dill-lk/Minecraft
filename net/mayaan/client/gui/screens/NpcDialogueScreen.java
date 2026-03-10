@@ -2,6 +2,7 @@ package net.mayaan.client.gui.screens;
 
 import net.mayaan.client.gui.GuiGraphics;
 import net.mayaan.client.gui.components.Button;
+import net.mayaan.client.input.KeyEvent;
 import net.mayaan.network.chat.CommonComponents;
 import net.mayaan.network.chat.Component;
 import net.mayaan.network.protocol.game.ClientboundMayaanNpcDialoguePacket;
@@ -144,6 +145,16 @@ public final class NpcDialogueScreen extends Screen {
     public boolean isPauseScreen() {
         // Dialogue does not pause a singleplayer world
         return false;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        // Enter or Space advance/close dialogue; let Escape fall through to the base close handler
+        if (event.key() == 257 || event.key() == 32) {
+            advance();
+            return true;
+        }
+        return super.keyPressed(event);
     }
 
     // ── Navigation ────────────────────────────────────────────────────────────

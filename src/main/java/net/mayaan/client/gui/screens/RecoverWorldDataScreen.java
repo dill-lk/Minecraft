@@ -13,7 +13,6 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.invoke.LambdaMetafactory;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -80,7 +79,7 @@ extends Screen {
         this.layout.addChild(this.issuesWidget);
         LinearLayout buttonGrid = LinearLayout.horizontal().spacing(5);
         buttonGrid.addChild(Button.builder(BUGTRACKER_BUTTON, ConfirmLinkScreen.confirmLink((Screen)this, CommonLinks.SNAPSHOT_BUGS_FEEDBACK)).size(120, 20).build());
-        buttonGrid.addChild(Button.builder((Component)RecoverWorldDataScreen.RESTORE_BUTTON, (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, lambda$new$0(net.mayaan.client.Mayaan net.mayaan.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((RecoverWorldDataScreen)this, (Mayaan)minecraft)).size((int)120, (int)20).tooltip((Tooltip)(canRecover ? null : Tooltip.create((Component)RecoverWorldDataScreen.NO_FALLBACK_TOOLTIP))).build()).active = canRecover;
+        buttonGrid.addChild(Button.builder(RecoverWorldDataScreen.RESTORE_BUTTON, button -> this.attemptRestore(minecraft)).size(120, 20).tooltip(canRecover ? null : Tooltip.create(RecoverWorldDataScreen.NO_FALLBACK_TOOLTIP)).build()).active = canRecover;
         this.layout.addChild(buttonGrid);
         this.layout.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).size(120, 20).build());
         this.layout.visitWidgets(this::addRenderableWidget);
@@ -156,10 +155,6 @@ extends Screen {
     @Override
     public void onClose() {
         this.callback.accept(false);
-    }
-
-    private /* synthetic */ void lambda$new$0(Mayaan minecraft, Button button) {
-        this.attemptRestore(minecraft);
     }
 }
 

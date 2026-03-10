@@ -14,7 +14,6 @@ import com.mojang.logging.LogUtils;
 import com.maayanlabs.realmsclient.RealmsMainScreen;
 import com.maayanlabs.realmsclient.gui.screens.RealmsNotificationsScreen;
 import java.io.IOException;
-import java.lang.invoke.LambdaMetafactory;
 import java.util.Objects;
 import net.mayaan.SharedConstants;
 import net.mayaan.client.Mayaan;
@@ -145,8 +144,12 @@ extends Screen {
         boolean multiplayerAllowed = multiplayerDisabledReason == null;
         Tooltip tooltip = multiplayerDisabledReason != null ? Tooltip.create(multiplayerDisabledReason) : null;
         topPos += spacing;
-        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, lambda$createNormalMenuOptions$1(net.mayaan.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)v0, (int)200, (int)20).tooltip((Tooltip)tooltip).build()).active = multiplayerAllowed;
-        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, lambda$createNormalMenuOptions$2(net.mayaan.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)v1, (int)200, (int)20).tooltip((Tooltip)tooltip).build()).active = multiplayerAllowed;
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.multiplayer"), button -> {
+            Screen screen = this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this);
+            this.minecraft.setScreen(screen);
+        }).bounds(this.width / 2 - 100, topPos, 200, 20).tooltip(tooltip).build()).active = multiplayerAllowed;
+        topPos += spacing;
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.online"), button -> this.minecraft.setScreen(new RealmsMainScreen(this))).bounds(this.width / 2 - 100, topPos, 200, 20).tooltip(tooltip).build()).active = multiplayerAllowed;
         return topPos += spacing;
     }
 
@@ -301,15 +304,6 @@ extends Screen {
     @Override
     public boolean canInterruptWithAnotherScreen() {
         return true;
-    }
-
-    private /* synthetic */ void lambda$createNormalMenuOptions$2(Button button) {
-        this.minecraft.setScreen(new RealmsMainScreen(this));
-    }
-
-    private /* synthetic */ void lambda$createNormalMenuOptions$1(Button button) {
-        Screen screen = this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this);
-        this.minecraft.setScreen(screen);
     }
 }
 

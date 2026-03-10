@@ -132,7 +132,7 @@ extends Screen {
                             return;
                         }
                         this.this$0.connection = pendingConnection;
-                        minecraft.getDownloadedPackSource().configureForServerControl(pendingConnection, 1.convertPackStatus(server.getResourcePackStatus()));
+                        minecraft.getDownloadedPackSource().configureForServerControl(pendingConnection, convertPackStatus(server.getResourcePackStatus()));
                     }
                     this.this$0.connection.initiateServerboundPlayConnection(address.getHostName(), address.getPort(), LoginProtocols.SERVERBOUND, LoginProtocols.CLIENTBOUND, new ClientHandshakePacketListenerImpl(this.this$0.connection, minecraft, server, this.this$0.parent, false, null, this.this$0::updateStatus, new LevelLoadTracker(), transferState), transferState != null);
                     this.this$0.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getUser().getProfileId()));

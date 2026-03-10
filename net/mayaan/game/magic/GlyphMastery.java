@@ -90,6 +90,19 @@ public enum GlyphMastery {
     }
 
     /**
+     * Returns {@code true} if this mastery tier is at least as high as {@code minimum}.
+     *
+     * <p>Prefer this over comparing {@link #ordinal()} directly for robustness
+     * against future enum reordering.
+     *
+     * @param minimum the minimum required mastery level
+     * @return {@code true} if {@code this.ordinal() >= minimum.ordinal()}
+     */
+    public boolean isAtLeast(GlyphMastery minimum) {
+        return this.ordinal() >= minimum.ordinal();
+    }
+
+    /**
      * Derives the mastery tier from a raw fragment count.
      * Returns {@link #UNLEARNED} for 0 fragments and {@link #MASTERED} for 5 or more.
      *

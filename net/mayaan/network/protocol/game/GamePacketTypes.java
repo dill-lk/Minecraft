@@ -398,6 +398,10 @@ public class GamePacketTypes {
     public static final PacketType<ClientboundMayaanNpcDialoguePacket> CLIENTBOUND_MAYAAN_NPC_DIALOGUE =
             new PacketType<>(PacketFlow.CLIENTBOUND, MayaanIdentifier.of("mayaan_npc_dialogue"));
 
+    /** Sent by the client to request a glyph cast after selecting glyph + tier on the cast screen. */
+    public static final PacketType<ServerboundMayaanCastGlyphPacket> SERVERBOUND_MAYAAN_CAST_GLYPH =
+            new PacketType<>(PacketFlow.SERVERBOUND, MayaanIdentifier.of("mayaan_cast_glyph"));
+
     private static <T extends Packet<ClientGamePacketListener>> PacketType<T> createClientbound(String id) {
         return new PacketType(PacketFlow.CLIENTBOUND, Identifier.withDefaultNamespace(id));
     }

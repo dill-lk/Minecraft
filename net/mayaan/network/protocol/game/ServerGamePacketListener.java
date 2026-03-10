@@ -188,5 +188,10 @@ ServerPingPacketListener {
     public void handleDebugSubscriptionRequest(ServerboundDebugSubscriptionRequestPacket var1);
 
     public void handleClientTickEnd(ServerboundClientTickEndPacket var1);
+
+    // ── Mayaan-specific server-side packet handlers ───────────────────────────
+
+    /** Handles a player's glyph cast request from the {@link net.mayaan.client.gui.screens.GlyphCastScreen}. */
+    public void handleMayaanCastGlyph(net.mayaan.network.protocol.game.ServerboundMayaanCastGlyphPacket var1);
 }
 

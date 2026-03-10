@@ -52,6 +52,15 @@ public final class AnimaBarHudRenderer implements ContextualBarRenderer {
      */
     private static final float LOW_ANIMA_PULSE_THRESHOLD = 0.20f;
 
+    /** Minimum opacity factor during the low-anima pulse animation. */
+    private static final float PULSE_MIN = 0.6f;
+
+    /** Amplitude of the low-anima pulse animation (added to {@link #PULSE_MIN}). */
+    private static final float PULSE_AMPLITUDE = 0.4f;
+
+    /** Angular frequency of the low-anima pulse animation (radians per game tick). */
+    private static final double PULSE_FREQUENCY = 0.25;
+
     /** Maximum possible Glyph Knowledge score (one point per {@link net.mayaan.game.magic.GlyphType}). */
     private static final int MAX_GLYPH_KNOWLEDGE_SCORE = 7;
 
@@ -87,9 +96,9 @@ public final class AnimaBarHudRenderer implements ContextualBarRenderer {
             if (drought) {
                 tint = TINT_DROUGHT;
             } else if (fill < LOW_ANIMA_PULSE_THRESHOLD) {
-                float pulse = 0.6f + 0.4f * (float) Math.sin(
+                float pulse = PULSE_MIN + PULSE_AMPLITUDE * (float) Math.sin(
                         minecraft.level != null
-                                ? (double) minecraft.level.getGameTime() * 0.25
+                                ? (double) minecraft.level.getGameTime() * PULSE_FREQUENCY
                                 : 0.0);
                 int alpha = (int) (255 * pulse);
                 tint = ARGB.color(alpha,

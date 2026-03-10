@@ -2166,5 +2166,26 @@ GameProtocols.Context {
         this.waitingForRespawn = false;
         this.clientLoadedTimeoutTimer = 60;
     }
+
+    // ── Mayaan ────────────────────────────────────────────────────────────────
+
+    @Override
+    public void handleMayaanCastGlyph(net.mayaan.network.protocol.game.ServerboundMayaanCastGlyphPacket packet) {
+        PacketUtils.ensureRunningOnSameThread(packet, this, this.player.serverLevel());
+        net.mayaan.game.magic.GlyphCasting.CastResult result =
+                net.mayaan.game.magic.GlyphCasting.tryCast(
+                        this.player.getUUID(),
+                        packet.getGlyphType(),
+                        packet.getCastTier());
+        if (result.outcome().isSuccess()) {
+            net.mayaan.game.MayaanServerEvents.onGlyphCastSuccess(this.player, result);
+        } else if (result.outcome() == net.mayaan.game.magic.GlyphCasting.CastOutcome.NO_ANIMA) {
+            // Recoil only on drought exhaustion — just send the failure back silently here
+        } else if (result.outcome() == net.mayaan.game.magic.GlyphCasting.CastOutcome.NO_MASTERY) {
+            net.mayaan.game.MayaanServerEvents.onGlyphRecoil(this.player);
+        }
+        // Always sync anima so the client bar reflects the cost (or no-change)
+        net.mayaan.game.MayaanPacketSender.sendAnimaSync(this.player);
+    }
 }
 

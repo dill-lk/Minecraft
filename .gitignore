@@ -1,0 +1,60 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# Eclipse
+.settings/
+bin/
+.classpath
+.project
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# NetBeans
+nbproject/
+nbbuild/
+nbdist/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# Run directories
+run/
+logs/
+
+# Forge
+/minecraft/
+/mcp/
+
+# Miscellaneous
+*.log
+*.swp
+*.tmp
+*~
+.cache
+
+# Generated resources
+src/generated/
+
+# Local configuration
+gradle.properties.local
+local.properties
+
+# Build outputs
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+!gradle/wrapper/gradle-wrapper.jar

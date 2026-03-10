@@ -13,7 +13,6 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.File;
 import java.io.IOException;
-import java.lang.invoke.LambdaMetafactory;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -91,7 +90,10 @@ extends Screen {
         this.nameEdit.setResponder(newName -> {
             renameButton.active = !StringUtil.isBlank(newName);
         });
-        this.layout.addChild(Button.builder((Component)EditWorldScreen.RESET_ICON_BUTTON, (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, lambda$new$3(net.mayaan.world.level.storage.LevelStorageSource$LevelStorageAccess net.mayaan.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((LevelStorageSource.LevelStorageAccess)levelAccess)).width((int)200).build()).active = levelAccess.getIconFile().filter(x$0 -> Files.isRegularFile(x$0, new LinkOption[0])).isPresent();
+        this.layout.addChild(Button.builder(EditWorldScreen.RESET_ICON_BUTTON, button -> {
+            levelAccess.getIconFile().ifPresent(p -> FileUtils.deleteQuietly(p.toFile()));
+            button.active = false;
+        }).width(200).build()).active = levelAccess.getIconFile().filter(x$0 -> Files.isRegularFile(x$0, new LinkOption[0])).isPresent();
         this.layout.addChild(Button.builder(FOLDER_BUTTON, button -> Util.getPlatform().openPath(levelAccess.getLevelPath(LevelResource.ROOT))).width(200).build());
         this.layout.addChild(Button.builder(BACKUP_BUTTON, button -> EditWorldScreen.makeBackupAndShowToast(levelAccess).thenAcceptAsync(success -> this.callback.accept(success == false), (Executor)minecraft)).width(200).build());
         this.layout.addChild(Button.builder(BACKUP_FOLDER_BUTTON, button -> {
@@ -190,9 +192,5 @@ extends Screen {
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 15, -1);
     }
 
-    private static /* synthetic */ void lambda$new$3(LevelStorageSource.LevelStorageAccess levelAccess, Button button) {
-        levelAccess.getIconFile().ifPresent(p -> FileUtils.deleteQuietly((File)p.toFile()));
-        button.active = false;
-    }
 }
 

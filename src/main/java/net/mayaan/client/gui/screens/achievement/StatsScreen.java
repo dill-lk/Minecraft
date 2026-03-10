@@ -32,6 +32,7 @@ import net.mayaan.client.gui.components.WidgetSprites;
 import net.mayaan.client.gui.components.events.GuiEventListener;
 import net.mayaan.client.gui.components.tabs.GridLayoutTab;
 import net.mayaan.client.gui.components.tabs.LoadingTab;
+import net.mayaan.client.gui.components.tabs.Tab;
 import net.mayaan.client.gui.components.tabs.TabManager;
 import net.mayaan.client.gui.components.tabs.TabNavigationBar;
 import net.mayaan.client.gui.layouts.HeaderAndFooterLayout;
@@ -125,25 +126,17 @@ extends Screen {
         }
     }
 
-    /*
-     * Unable to fully structure code
-     */
     private void setTabActiveStateAndTooltip(int index) {
         if (this.tabNavigationBar == null) {
             return;
         }
-        var4_2 = this.tabNavigationBar.getTabs().get(index);
-        if (!(var4_2 instanceof StatisticsTab)) ** GOTO lbl-1000
-        statsTab = (StatisticsTab)var4_2;
-        if (!statsTab.list.children().isEmpty()) {
-            v0 = true;
-        } else lbl-1000:
-        // 2 sources
-
-        {
-            v0 = false;
+        Tab tab = this.tabNavigationBar.getTabs().get(index);
+        boolean active;
+        if (tab instanceof StatisticsTab statsTab) {
+            active = !statsTab.list.children().isEmpty();
+        } else {
+            active = false;
         }
-        active = v0;
         this.tabNavigationBar.setTabActiveState(index, active);
         if (active) {
             this.tabNavigationBar.setTabTooltip(index, null);

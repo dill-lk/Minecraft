@@ -310,57 +310,51 @@ implements Renderable {
      * Loose catch block
      */
     protected static void defaultHandleClickEvent(ClickEvent event, Mayaan minecraft, @Nullable Screen activeScreen) {
-        block12: {
-            boolean shouldActivateScreen;
-            ClickEvent clickEvent = event;
-            Objects.requireNonNull(clickEvent);
-            ClickEvent clickEvent2 = clickEvent;
+        try {
+            boolean shouldActivateScreen = false;
+            ClickEvent clickEvent2 = event;
+            Objects.requireNonNull(clickEvent2);
             int n = 0;
             switch (SwitchBootstraps.typeSwitch("typeSwitch", new Object[]{ClickEvent.OpenUrl.class, ClickEvent.OpenFile.class, ClickEvent.SuggestCommand.class, ClickEvent.CopyToClipboard.class}, (ClickEvent)clickEvent2, n)) {
                 case 0: {
-                    URI uRI;
                     ClickEvent.OpenUrl openUrl = (ClickEvent.OpenUrl)clickEvent2;
-                    URI uri = uRI = openUrl.uri();
+                    URI uri = openUrl.uri();
                     Screen.clickUrlAction(minecraft, activeScreen, uri);
-                    boolean bl = false;
+                    shouldActivateScreen = false;
                     break;
                 }
                 case 1: {
                     ClickEvent.OpenFile openFile = (ClickEvent.OpenFile)clickEvent2;
                     Util.getPlatform().openFile(openFile.file());
-                    boolean bl = true;
+                    shouldActivateScreen = true;
                     break;
                 }
                 case 2: {
-                    Object object;
                     ClickEvent.SuggestCommand suggestCommand = (ClickEvent.SuggestCommand)clickEvent2;
-                    Object command = object = suggestCommand.command();
+                    String command = suggestCommand.command();
                     if (activeScreen != null) {
-                        activeScreen.insertText((String)command, true);
+                        activeScreen.insertText(command, true);
                     }
-                    boolean bl = true;
+                    shouldActivateScreen = true;
                     break;
                 }
                 case 3: {
-                    String string;
-                    Object object = (ClickEvent.CopyToClipboard)clickEvent2;
-                    String value = string = ((ClickEvent.CopyToClipboard)object).value();
+                    ClickEvent.CopyToClipboard copyToClipboard = (ClickEvent.CopyToClipboard)clickEvent2;
+                    String value = copyToClipboard.value();
                     minecraft.keyboardHandler.setClipboard(value);
-                    boolean bl = true;
+                    shouldActivateScreen = true;
                     break;
                 }
                 default: {
                     LOGGER.error("Don't know how to handle {}", (Object)event);
-                    boolean bl = shouldActivateScreen = true;
+                    shouldActivateScreen = true;
                 }
             }
             if (shouldActivateScreen && minecraft.screen != activeScreen) {
                 minecraft.setScreen(activeScreen);
             }
-            break block12;
-            catch (Throwable throwable) {
-                throw new MatchException(throwable.toString(), throwable);
-            }
+        } catch (Throwable throwable) {
+            throw new MatchException(throwable.toString(), throwable);
         }
     }
 

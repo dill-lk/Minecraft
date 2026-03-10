@@ -47,10 +47,10 @@ public final class CodexJournalScreen extends Screen {
     private static final int TEXT_COLOUR = 0xFFDDD8C8;
 
     // Mastery pip colours
-    private static final int PIP_MASTERED = 0xFF5AFFE0;   // bright teal
-    private static final int PIP_PRACTICED = 0xFF6080CC;  // muted blue
-    private static final int PIP_INSCRIBED = 0xFF806040;  // amber-brown
-    private static final int PIP_UNLEARNED = 0xFF303030;  // dark grey
+    private static final int PIP_MASTERED = 0xFF5AFFE0;      // bright teal
+    private static final int PIP_PRACTICED = 0xFF6080CC;     // muted blue
+    private static final int PIP_FRAGMENTARY = 0xFF806040;   // amber-brown
+    private static final int PIP_UNLEARNED = 0xFF303030;     // dark grey
 
     private static final int PIP_W = 16;
     private static final int PIP_H = 14;
@@ -140,8 +140,8 @@ public final class CodexJournalScreen extends Screen {
         // Mastery legend
         renderLegendEntry(graphics, panelLeft + 10, y, PIP_MASTERED, "Mastered");
         renderLegendEntry(graphics, panelLeft + 80, y, PIP_PRACTICED, "Practiced");
-        renderLegendEntry(graphics, panelLeft + 160, y, PIP_INSCRIBED, "Inscribed");
-        renderLegendEntry(graphics, panelLeft + 240, y, PIP_UNLEARNED, "Unlearned");
+        renderLegendEntry(graphics, panelLeft + 160, y, PIP_FRAGMENTARY, "Fragmentary");
+        renderLegendEntry(graphics, panelLeft + 250, y, PIP_UNLEARNED, "Unlearned");
         y += this.font.lineHeight + 16;
 
         // Divider
@@ -176,7 +176,7 @@ public final class CodexJournalScreen extends Screen {
         return switch (mastery) {
             case MASTERED -> PIP_MASTERED;
             case PRACTICED -> PIP_PRACTICED;
-            case INSCRIBED -> PIP_INSCRIBED;
+            case FRAGMENTARY -> PIP_FRAGMENTARY;
             default -> PIP_UNLEARNED;
         };
     }

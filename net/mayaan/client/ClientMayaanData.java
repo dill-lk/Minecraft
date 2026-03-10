@@ -121,7 +121,7 @@ public final class ClientMayaanData {
      * Called when the player disconnects or the level is unloaded.
      */
     public void reset() {
-        this.currentAnima = AnimaSystem.DEFAULT_MAX_ANIMA;
+        this.currentAnima = 0f;
         this.maxAnima = AnimaSystem.DEFAULT_MAX_ANIMA;
         this.inDrought = false;
         this.knowledgeScore = 0;

@@ -511,7 +511,7 @@ implements ArgumentType<NbtPath> {
                     return 1;
                 }
                 Tag newValue = toAdd.get();
-                int changedCount = size - (int)list.stream().filter((Predicate<Tag>)LambdaMetafactory.metafactory(null, null, null, (Ljava/lang/Object;)Z, equals(java.lang.Object ), (Lnet/minecraft/nbt/Tag;)Z)((Tag)newValue)).count();
+                int changedCount = size - (int)list.stream().filter(tag -> tag.equals(newValue)).count();
                 if (changedCount == 0) {
                     return 0;
                 }

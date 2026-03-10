@@ -29,12 +29,12 @@ implements CollectionTag {
 
         @Override
         public ByteArrayTag load(DataInput input, NbtAccounter accounter) throws IOException {
-            return new ByteArrayTag(1.readAccounted(input, accounter));
+            return new ByteArrayTag(readAccounted(input, accounter));
         }
 
         @Override
         public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor output, NbtAccounter accounter) throws IOException {
-            return output.visit(1.readAccounted(input, accounter));
+            return output.visit(readAccounted(input, accounter));
         }
 
         private static byte[] readAccounted(DataInput input, NbtAccounter accounter) throws IOException {

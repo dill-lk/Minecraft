@@ -297,7 +297,7 @@ implements WritableRegistry<T> {
             return this;
         }
         this.frozen = true;
-        this.byValue.forEach((? super K value, ? super V holder) -> holder.bindValue(value));
+        this.byValue.forEach((value, holder) -> holder.bindValue(value));
         List<Identifier> unboundEntries = this.byKey.entrySet().stream().filter(e -> !((Holder.Reference)e.getValue()).isBound()).map(e -> ((ResourceKey)e.getKey()).identifier()).sorted().toList();
         if (!unboundEntries.isEmpty()) {
             throw new IllegalStateException("Unbound values in registry " + String.valueOf(this.key()) + ": " + String.valueOf(unboundEntries));
@@ -349,13 +349,13 @@ implements WritableRegistry<T> {
     @Override
     public void bindTags(Map<TagKey<T>, List<Holder<T>>> pendingTags) {
         this.validateWrite();
-        pendingTags.forEach((? super K id, ? super V values) -> this.getOrCreateTagForRegistration((TagKey<T>)id).bind((List<Holder<T>>)values));
+        pendingTags.forEach((id, values) -> this.getOrCreateTagForRegistration((TagKey<T>)id).bind((List<Holder<T>>)values));
     }
 
     private void refreshTagsInHolders() {
         IdentityHashMap<Holder.Reference, List> tagsForElement = new IdentityHashMap<Holder.Reference, List>();
         this.byKey.values().forEach(h -> tagsForElement.put((Holder.Reference)h, new ArrayList()));
-        this.allTags.forEach((? super TagKey<T> id, ? super HolderSet.Named<T> values) -> {
+        this.allTags.forEach((id, values) -> {
             for (Holder value : values) {
                 Holder.Reference reference = this.validateAndUnwrapTagElement((TagKey<T>)id, value);
                 ((List)tagsForElement.get(reference)).add(id);
@@ -409,7 +409,7 @@ implements WritableRegistry<T> {
         }
         ImmutableMap.Builder pendingTagsBuilder = ImmutableMap.builder();
         final HashMap pendingContents = new HashMap();
-        tags.tags().forEach((? super K id, ? super V contents) -> {
+        tags.tags().forEach((id, contents) -> {
             HolderSet.Named<T> tagToAdd = this.frozenTags.get(id);
             if (tagToAdd == null) {
                 tagToAdd = this.createTag((TagKey<T>)id);

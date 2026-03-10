@@ -82,7 +82,7 @@ implements Tag {
         public CompoundTag load(DataInput input, NbtAccounter accounter) throws IOException {
             accounter.pushDepth();
             try {
-                CompoundTag compoundTag = 1.loadCompound(input, accounter);
+                CompoundTag compoundTag = loadCompound(input, accounter);
                 return compoundTag;
             }
             finally {
@@ -96,7 +96,7 @@ implements Tag {
             HashMap values = Maps.newHashMap();
             while ((tagType = input.readByte()) != 0) {
                 Tag tag;
-                String key = 1.readString(input, accounter);
+                String key = readString(input, accounter);
                 if (values.put(key, tag = CompoundTag.readNamedTagData(TagTypes.getType(tagType), key, input, accounter)) != null) continue;
                 accounter.accountBytes(36L);
             }
@@ -110,7 +110,7 @@ implements Tag {
         public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor output, NbtAccounter accounter) throws IOException {
             accounter.pushDepth();
             try {
-                StreamTagVisitor.ValueResult valueResult = 1.parseCompound(input, output, accounter);
+                StreamTagVisitor.ValueResult valueResult = parseCompound(input, output, accounter);
                 return valueResult;
             }
             finally {
@@ -138,7 +138,7 @@ implements Tag {
                         continue block13;
                     }
                     default: {
-                        String key = 1.readString(input, accounter);
+                        String key = readString(input, accounter);
                         switch (output.visitEntry(tagType, key)) {
                             case HALT: {
                                 return StreamTagVisitor.ValueResult.HALT;
@@ -507,7 +507,7 @@ implements Tag {
     @Override
     public CompoundTag copy() {
         HashMap<String, Tag> newTags = new HashMap<String, Tag>();
-        this.tags.forEach((? super K key, ? super V tag) -> newTags.put((String)key, tag.copy()));
+        this.tags.forEach((key, tag) -> newTags.put((String)key, tag.copy()));
         return new CompoundTag(newTags);
     }
 

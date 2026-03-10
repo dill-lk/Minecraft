@@ -125,9 +125,9 @@ public class RegistrySetBuilder {
             @Override
             public <V> RegistryOps<V> createSerializationContext(DynamicOps<V> parent) {
                 return RegistryOps.create(parent, new RegistryOps.RegistryInfoLookup(this){
-                    final /* synthetic */ 3 this$0;
+                    final UniversalLookup this$0;
                     {
-                        3 v0 = this$0;
+                        UniversalLookup v0 = this$0;
                         Objects.requireNonNull(v0);
                         this.this$0 = v0;
                     }

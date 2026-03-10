@@ -20,12 +20,12 @@ public record ByteTag(byte value) implements NumericTag
 
         @Override
         public ByteTag load(DataInput input, NbtAccounter accounter) throws IOException {
-            return ByteTag.valueOf(1.readAccounted(input, accounter));
+            return ByteTag.valueOf(readAccounted(input, accounter));
         }
 
         @Override
         public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor output, NbtAccounter accounter) throws IOException {
-            return output.visit(1.readAccounted(input, accounter));
+            return output.visit(readAccounted(input, accounter));
         }
 
         private static byte readAccounted(DataInput input, NbtAccounter accounter) throws IOException {

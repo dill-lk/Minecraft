@@ -392,6 +392,36 @@ public final class MayaanNpcs {
 
     // ── NpcEntry ─────────────────────────────────────────────────────────────
 
+    /**
+     * Ix — the player's Construct companion.
+     *
+     * <p>Ix communicates through fragmented memories recovered as the player repairs its
+     * Core. Each repair threshold unlocks the next memory, and the NPC dialogue reflects
+     * how many memories have been restored.
+     */
+    public static final NpcEntry IX_COMPANION = NpcEntry.builder("ix")
+            .faction(null)
+            .script(new DialogueScript.Builder("fully_repaired")
+                    .condition(new DialogueCondition.Builder()
+                            .chapter(StoryChapter.HEARTS_UNBOUND)
+                            .build())
+                    .line("ix", "npc.ix.script.fully_repaired.line.1")
+                    .line("ix", "npc.ix.script.fully_repaired.line.2")
+                    .build())
+            .script(new DialogueScript.Builder("partial_memory")
+                    .condition(new DialogueCondition.Builder()
+                            .chapter(StoryChapter.THE_WANDERERS_WAKE)
+                            .build())
+                    .line("ix", "npc.ix.script.partial_memory.line.1")
+                    .line("ix", "npc.ix.script.partial_memory.line.2")
+                    .line("ix", "npc.ix.script.partial_memory.line.3")
+                    .build())
+            .script(new DialogueScript.Builder("awakening")
+                    .line("ix", "npc.ix.script.awakening.line.1")
+                    .line("ix", "npc.ix.script.awakening.line.2")
+                    .build())
+            .build();
+
     private MayaanNpcs() {}
 
     /**

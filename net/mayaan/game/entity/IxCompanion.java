@@ -13,7 +13,12 @@ import net.mayaan.world.entity.ai.goal.LookAtPlayerGoal;
 import net.mayaan.world.entity.ai.goal.RandomLookAroundGoal;
 import net.mayaan.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.mayaan.world.entity.animal.golem.AbstractGolem;
+import net.mayaan.game.MayaanItems;
+import net.mayaan.game.MayaanServerEvents;
+import net.mayaan.world.InteractionHand;
+import net.mayaan.world.InteractionResult;
 import net.mayaan.world.entity.player.Player;
+import net.mayaan.world.item.ItemStack;
 import net.mayaan.world.level.Level;
 import net.mayaan.world.level.storage.ValueInput;
 import net.mayaan.world.level.storage.ValueOutput;
@@ -242,5 +247,63 @@ public class IxCompanion extends AbstractGolem {
     @Override
     protected Component getTypeName() {
         return Component.translatable("entity.mayaan.ix");
+    }
+
+    // ── Interaction ───────────────────────────────────────────────────────────
+
+    /**
+     * Called when a player right-clicks Ix.
+     *
+     * <ul>
+     *   <li>Right-click with a <b>Core Shard</b>: repairs Ix for
+     *       {@link #CORE_SHARD_REPAIR_AMOUNT} health; may unlock a memory.</li>
+     *   <li>Right-click with an <b>Anima Shard</b>: repairs Ix for
+     *       {@link #ANIMA_SHARD_REPAIR_AMOUNT} health (no memory unlock).</li>
+     *   <li>Empty-handed: if the level is client-side, opens the NPC dialogue via the
+     *       registered Ix NPC entry.</li>
+     * </ul>
+     */
+    @Override
+    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        if (level().isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+
+        ItemStack stack = player.getItemInHand(hand);
+
+        if (stack.getItem() == MayaanItems.CORE_SHARD) {
+            String unlockedMemory = applyRepair(CORE_SHARD_REPAIR_AMOUNT, true);
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+            if (unlockedMemory != null) {
+                player.sendSystemMessage(
+                        Component.translatable("entity.mayaan.ix.memory_unlocked", unlockedMemory));
+            } else {
+                player.sendSystemMessage(
+                        Component.translatable("entity.mayaan.ix.repaired"));
+            }
+            // Send updated glyph sync in case the memory unlock affects knowledge
+            if (player instanceof net.mayaan.server.level.ServerPlayer serverPlayer) {
+                net.mayaan.game.MayaanPacketSender.sendGlyphSync(serverPlayer);
+            }
+            return InteractionResult.CONSUME;
+        }
+
+        if (stack.getItem() == MayaanItems.ANIMA_SHARD) {
+            applyRepair(ANIMA_SHARD_REPAIR_AMOUNT, false);
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+            player.sendSystemMessage(Component.translatable("entity.mayaan.ix.repaired_minor"));
+            return InteractionResult.CONSUME;
+        }
+
+        // Empty-hand (or other item): open dialogue
+        if (player instanceof net.mayaan.server.level.ServerPlayer serverPlayer) {
+            MayaanServerEvents.openDialogueFor(serverPlayer,
+                    net.mayaan.game.npc.MayaanNpcs.IX_COMPANION);
+        }
+        return InteractionResult.SUCCESS;
     }
 }

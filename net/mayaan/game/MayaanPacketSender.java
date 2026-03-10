@@ -1,13 +1,18 @@
 package net.mayaan.game;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import net.mayaan.game.magic.AnimaManager;
 import net.mayaan.game.magic.GlyphKnowledgeManager;
 import net.mayaan.game.magic.GlyphMastery;
 import net.mayaan.game.magic.GlyphType;
 import net.mayaan.game.magic.PlayerAnimaData;
+import net.mayaan.game.npc.MayaanNpcs;
+import net.mayaan.game.npc.NpcDialogue;
 import net.mayaan.network.protocol.game.ClientboundMayaanAnimaPacket;
 import net.mayaan.network.protocol.game.ClientboundMayaanGlyphSyncPacket;
+import net.mayaan.network.protocol.game.ClientboundMayaanNpcDialoguePacket;
 import net.mayaan.server.level.ServerPlayer;
 
 /**
@@ -79,5 +84,31 @@ public final class MayaanPacketSender {
     public static void sendAll(ServerPlayer player) {
         sendAnimaSync(player);
         sendGlyphSync(player);
+    }
+
+    /**
+     * Resolves the correct dialogue script for the player and sends a
+     * {@link ClientboundMayaanNpcDialoguePacket} to open the NPC dialogue screen.
+     *
+     * @param player   the player initiating dialogue
+     * @param npcEntry the NPC being talked to
+     */
+    public static void sendNpcDialogue(ServerPlayer player, MayaanNpcs.NpcEntry npcEntry) {
+        UUID id = player.getUUID();
+        NpcDialogue.DialogueScript script = npcEntry.scriptFor(id);
+        List<NpcDialogue.DialogueLine> lines = script.resolveFor(id);
+
+        List<String> speakerKeys = new ArrayList<>(lines.size());
+        List<String> textKeys = new ArrayList<>(lines.size());
+        for (NpcDialogue.DialogueLine line : lines) {
+            speakerKeys.add(line.speaker());
+            textKeys.add(line.translationKey());
+        }
+
+        player.connection.send(new ClientboundMayaanNpcDialoguePacket(
+                npcEntry.npcId(),
+                npcEntry.displayNameKey(),
+                speakerKeys,
+                textKeys));
     }
 }

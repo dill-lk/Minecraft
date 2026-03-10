@@ -131,6 +131,7 @@ import net.mayaan.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.mayaan.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.mayaan.network.protocol.game.ClientboundMayaanAnimaPacket;
 import net.mayaan.network.protocol.game.ClientboundMayaanGlyphSyncPacket;
+import net.mayaan.network.protocol.game.ClientboundMayaanNpcDialoguePacket;
 import net.mayaan.network.protocol.ping.ClientPongPacketListener;
 
 public interface ClientGamePacketListener
@@ -396,5 +397,8 @@ ClientPongPacketListener {
 
     /** Handles a sync of the player's Glyph Knowledge state from the server. */
     public void handleMayaanGlyphSync(ClientboundMayaanGlyphSyncPacket var1);
+
+    /** Handles opening an NPC dialogue screen with server-resolved lines. */
+    public void handleMayaanNpcDialogue(ClientboundMayaanNpcDialoguePacket var1);
 }
 

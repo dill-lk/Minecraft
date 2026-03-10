@@ -394,6 +394,10 @@ public class GamePacketTypes {
     public static final PacketType<ClientboundMayaanGlyphSyncPacket> CLIENTBOUND_MAYAAN_GLYPH_SYNC =
             new PacketType<>(PacketFlow.CLIENTBOUND, MayaanIdentifier.of("mayaan_glyph_sync"));
 
+    /** Opens an NPC dialogue screen on the client with server-resolved dialogue lines. */
+    public static final PacketType<ClientboundMayaanNpcDialoguePacket> CLIENTBOUND_MAYAAN_NPC_DIALOGUE =
+            new PacketType<>(PacketFlow.CLIENTBOUND, MayaanIdentifier.of("mayaan_npc_dialogue"));
+
     private static <T extends Packet<ClientGamePacketListener>> PacketType<T> createClientbound(String id) {
         return new PacketType(PacketFlow.CLIENTBOUND, Identifier.withDefaultNamespace(id));
     }

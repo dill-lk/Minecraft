@@ -2362,6 +2362,12 @@ TickablePacketListener {
         net.mayaan.client.ClientMayaanData.INSTANCE.onGlyphSync(packet);
     }
 
+    @Override
+    public void handleMayaanNpcDialogue(net.mayaan.network.protocol.game.ClientboundMayaanNpcDialoguePacket packet) {
+        PacketUtils.ensureRunningOnSameThread(packet, this, this.minecraft.packetProcessor());
+        this.minecraft.setScreen(new net.mayaan.client.gui.screens.NpcDialogueScreen(packet));
+    }
+
     private void readSectionList(int chunkX, int chunkZ, LevelLightEngine lightEngine, LightLayer layer, BitSet yMask, BitSet emptyYMask, Iterator<byte[]> updates, boolean scheduleRebuild) {
         for (int sectionIndex = 0; sectionIndex < lightEngine.getLightSectionCount(); ++sectionIndex) {
             int sectionY = lightEngine.getMinLightSection() + sectionIndex;

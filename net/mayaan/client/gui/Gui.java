@@ -1150,15 +1150,18 @@ public class Gui {
         boolean canShowVehicleJumpInfo = this.minecraft.player.jumpableVehicle() != null;
         boolean canShowExperienceInfo = this.minecraft.gameMode.hasExperience();
 
-        // Vehicle jumping always takes priority (spatial awareness > anima pool)
-        if (canShowVehicleJumpInfo) {
+        // Vehicle jumping always takes priority when actively charging or cooling down
+        if (canShowVehicleJumpInfo && this.willPrioritizeJumpInfo()) {
             return ContextualInfo.JUMPABLE_VEHICLE;
         }
         // Show the Anima bar whenever the player can take damage (survival / adventure modes)
         if (this.minecraft.gameMode.canHurtPlayer()) {
             return ContextualInfo.ANIMA;
         }
-        // Fallback: locator → experience → empty (original logic for non-combat modes)
+        // Fallback: vehicle (if present but not actively jumping) → locator → experience → empty
+        if (canShowVehicleJumpInfo) {
+            return ContextualInfo.JUMPABLE_VEHICLE;
+        }
         if (canShowLocatorInfo) {
             if (canShowExperienceInfo && this.willPrioritizeExperienceInfo()) {
                 return ContextualInfo.EXPERIENCE;

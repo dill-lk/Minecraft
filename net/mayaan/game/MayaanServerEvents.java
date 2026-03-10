@@ -13,6 +13,7 @@ import net.mayaan.game.magic.AnimaManager;
 import net.mayaan.game.magic.AnimaSystem;
 import net.mayaan.game.magic.GlyphType;
 import net.mayaan.game.magic.PlayerAnimaData;
+import net.mayaan.game.npc.MayaanNpcs;
 import net.mayaan.game.story.StoryChapter;
 import net.mayaan.game.story.StoryManager;
 import net.mayaan.game.story.StorySpawnHandler;
@@ -346,6 +347,22 @@ public final class MayaanServerEvents {
         } else {
             AnimaManager.INSTANCE.getAnimaData(playerId).resetLeylineContactTicks();
         }
+    }
+
+    /**
+     * Called when a player right-clicks an NPC entity to initiate dialogue.
+     *
+     * <p>Resolves the correct {@link net.mayaan.game.npc.NpcDialogue.DialogueScript} for this
+     * player, builds a list of resolved translation keys, and sends a
+     * {@link net.mayaan.network.protocol.game.ClientboundMayaanNpcDialoguePacket} to the client
+     * which opens the {@link net.mayaan.client.gui.screens.NpcDialogueScreen}.
+     *
+     * @param player   the player who initiated the interaction
+     * @param npcEntry the NPC being talked to
+     */
+    public static void openDialogueFor(ServerPlayer player,
+            net.mayaan.game.npc.MayaanNpcs.NpcEntry npcEntry) {
+        MayaanPacketSender.sendNpcDialogue(player, npcEntry);
     }
 
     /**

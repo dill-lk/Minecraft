@@ -1,5 +1,6 @@
 package net.mayaan.game.story;
 
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -367,6 +368,27 @@ public enum StoryChapter {
         for (StoryGoal goal : goals) {
             if (goal.getId().equals(goalId)) {
                 return goal;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Codec that serializes/deserializes a {@link StoryChapter} by its string ID
+     * (e.g., {@code "dreamers_shore"}).
+     */
+    public static final Codec<StoryChapter> CODEC =
+            Codec.STRING.xmap(StoryChapter::byId, StoryChapter::getId);
+
+    /**
+     * Finds the chapter with the given ID, or {@code null} if not found.
+     *
+     * @param id the chapter identifier (e.g., {@code "dreamers_shore"})
+     */
+    public static StoryChapter byId(String id) {
+        for (StoryChapter chapter : values()) {
+            if (chapter.getId().equals(id)) {
+                return chapter;
             }
         }
         return null;

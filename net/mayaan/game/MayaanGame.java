@@ -1,5 +1,6 @@
 package net.mayaan.game;
 
+import net.mayaan.game.advancements.MayaanCriteriaTriggers;
 import net.mayaan.game.echo.TimelineEchoRegistry;
 import net.mayaan.game.entity.MayaanEntities;
 import net.mayaan.game.faction.Faction;
@@ -35,6 +36,8 @@ import net.mayaan.game.story.StoryChapter;
  *   <li>{@link MayaanMobEffects} — mob effects: Anima Slow, Bloom Haze, Void Disorientation, etc.</li>
  *   <li>{@link MayaanDamageTypes} — damage type resource keys for Anima Drain, Void Touch, etc.</li>
  *   <li>{@link MayaanNpcs} — NPC entries for all 8 named characters with full dialogue scripts</li>
+ *   <li>{@link MayaanCriteriaTriggers} — advancement criterion triggers: glyph cast, story goal, echo</li>
+ *   <li>{@link MayaanServerEvents} — server event wiring: join/leave/tick/death/cast hooks</li>
  * </ol>
  *
  * <h2>The story of Mayaan</h2>
@@ -168,6 +171,10 @@ public final class MayaanGame {
 
         // Eagerly initialize all NPC entries so dialogue scripts are compiled at startup.
         MayaanNpcs.class.getName();
+
+        // Register Mayaan advancement criterion triggers so they are available
+        // before any advancement JSON is loaded.
+        MayaanCriteriaTriggers.bootstrap();
 
         // Touch singleton managers so they are initialized (though they hold no static
         // state that needs warming — this just confirms they are classloaded early).

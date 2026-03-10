@@ -1,5 +1,6 @@
 package net.mayaan.game.magic;
 
+import com.mojang.serialization.Codec;
 import java.util.UUID;
 
 /**
@@ -150,6 +151,31 @@ public final class GlyphCasting {
         public GlyphMastery requiredMastery() {
             return requiredMastery;
         }
+
+        /**
+         * Returns the lowercase string ID of this tier (e.g., {@code "basic"}, {@code "prime"}).
+         */
+        public String getId() {
+            return name().toLowerCase(java.util.Locale.ROOT);
+        }
+
+        /**
+         * Finds a cast tier by its lowercase string ID, or {@code null} if not found.
+         */
+        public static CastTier byId(String id) {
+            for (CastTier tier : values()) {
+                if (tier.getId().equals(id)) {
+                    return tier;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Codec that serializes/deserializes {@link CastTier} by its string ID.
+         */
+        public static final Codec<CastTier> CODEC =
+                Codec.STRING.xmap(CastTier::byId, CastTier::getId);
     }
 
     /**

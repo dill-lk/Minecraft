@@ -107,6 +107,7 @@ import net.mayaan.server.commands.GameModeCommand;
 import net.mayaan.server.commands.GameRuleCommand;
 import net.mayaan.server.commands.GiveCommand;
 import net.mayaan.server.commands.HelpCommand;
+import net.mayaan.server.commands.MayaanCommand;
 import net.mayaan.server.commands.ItemCommands;
 import net.mayaan.server.commands.JfrCommand;
 import net.mayaan.server.commands.KickCommand;
@@ -242,6 +243,7 @@ public class Commands {
         GameRuleCommand.register(this.dispatcher, context);
         GiveCommand.register(this.dispatcher, context);
         HelpCommand.register(this.dispatcher);
+        MayaanCommand.register(this.dispatcher, context);
         ItemCommands.register(this.dispatcher, context);
         KickCommand.register(this.dispatcher);
         KillCommand.register(this.dispatcher);

@@ -1,5 +1,7 @@
 package net.mayaan.game.magic;
 
+import com.mojang.serialization.Codec;
+
 /**
  * The Glyph types known in the Mayaan civilization.
  *
@@ -75,6 +77,13 @@ public enum GlyphType {
         }
         return null;
     }
+
+    /**
+     * Codec that serializes/deserializes a {@link GlyphType} by its string ID
+     * (e.g., {@code "seek"}, {@code "translate"}).
+     */
+    public static final Codec<GlyphType> CODEC =
+            Codec.STRING.xmap(GlyphType::byId, GlyphType::getId);
 
     @Override
     public String toString() {

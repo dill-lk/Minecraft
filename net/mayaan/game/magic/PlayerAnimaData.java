@@ -48,6 +48,21 @@ public final class PlayerAnimaData {
      */
     private int droughtPoints;
 
+    // ── Runtime-only fields (not persisted) ───────────────────────────────────
+
+    /**
+     * Whether the drought-onset sound has been played since entering the current drought.
+     * Reset to {@code false} when the drought clears.
+     */
+    private boolean droughtSoundPlayed;
+
+    /**
+     * Number of consecutive leyline-contact checks (at {@code LEYLINE_CHECK_INTERVAL} ticks)
+     * since the player last left a Leyline Conduit.
+     * Used by {@link net.mayaan.game.MayaanServerEvents} to gate the Anima Surge effect.
+     */
+    private int leylineContactTicks;
+
     private PlayerAnimaData(float currentAnima, int maxAnima, int droughtPoints) {
         this.maxAnima = maxAnima;
         this.droughtPoints = droughtPoints;
@@ -193,6 +208,38 @@ public final class PlayerAnimaData {
      */
     public void setCurrentAnima(float value) {
         currentAnima = Math.max(0f, Math.min(maxAnima, value));
+    }
+
+    // ── Runtime (non-persisted) state ─────────────────────────────────────────
+
+    /** Returns {@code true} if the drought-onset sound has already been played this drought. */
+    public boolean isDroughtSoundPlayed() {
+        return droughtSoundPlayed;
+    }
+
+    /** Marks the drought-onset sound as having been played. */
+    public void markDroughtSoundPlayed() {
+        droughtSoundPlayed = true;
+    }
+
+    /** Clears the drought-sound-played flag (called when drought ends). */
+    public void clearDroughtSoundPlayed() {
+        droughtSoundPlayed = false;
+    }
+
+    /** Returns the number of consecutive leyline-contact checks accumulated. */
+    public int getLeylineContactTicks() {
+        return leylineContactTicks;
+    }
+
+    /** Increments the leyline-contact counter by one check. */
+    public void incrementLeylineContactTicks() {
+        leylineContactTicks++;
+    }
+
+    /** Resets the leyline-contact counter to zero (called when player leaves a conduit). */
+    public void resetLeylineContactTicks() {
+        leylineContactTicks = 0;
     }
 
     // ── Serialization ─────────────────────────────────────────────────────────

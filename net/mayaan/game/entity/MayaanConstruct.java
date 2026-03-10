@@ -8,7 +8,6 @@ import net.mayaan.world.entity.ai.attributes.AttributeSupplier;
 import net.mayaan.world.entity.ai.attributes.Attributes;
 import net.mayaan.world.entity.ai.goal.FloatGoal;
 import net.mayaan.world.entity.ai.goal.LookAtPlayerGoal;
-import net.mayaan.world.entity.ai.goal.MoveTowardsTargetGoal;
 import net.mayaan.world.entity.ai.goal.RandomLookAroundGoal;
 import net.mayaan.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.mayaan.world.entity.animal.golem.AbstractGolem;
@@ -125,21 +124,21 @@ public class MayaanConstruct extends AbstractGolem {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new MoveTowardsTargetGoal(this, 0.9, 32.0f));
-        this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 8.0f));
-        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 0.8));
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0f));
+        this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 0.8));
+        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
     }
 
     @Override
     public void aiStep() {
         super.aiStep();
-        // When bonded, keep the nearest player as the movement target so
-        // MoveTowardsTargetGoal navigates the Construct toward its companion.
+        // When bonded, navigate directly toward the nearest player at a comfortable
+        // following distance. We use getNavigation().moveTo() rather than setTarget()
+        // to avoid triggering any aggression goals.
         if (bonded && !level().isClientSide()) {
             Player nearest = level().getNearestPlayer(this, 32.0);
-            if (nearest != null) {
-                setTarget(nearest);
+            if (nearest != null && distanceTo(nearest) > 4.0) {
+                getNavigation().moveTo(nearest, 0.9);
             }
         }
     }

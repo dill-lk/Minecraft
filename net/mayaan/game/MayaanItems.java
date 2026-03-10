@@ -220,6 +220,57 @@ public final class MayaanItems {
     public static final Item POLISHED_GLYPH_STONE = MayaanItems.registerBlock("polished_glyph_stone",
             MayaanBlocks.POLISHED_GLYPH_STONE);
 
+    // ── Creature drops & crafting materials ───────────────────────────────────
+
+    /**
+     * Serpent Scale Plate — shed outer plate from a Stone Serpent.
+     * Used in heavy Construct armor and explosion-resistant structures.
+     * Shed periodically by live Stone Serpents during migration.
+     */
+    public static final Item SERPENT_SCALE_PLATE = MayaanItems.register(
+            "serpent_scale_plate",
+            props -> new Item(props.stacksTo(64)));
+
+    /**
+     * Stalker Scale — tough chitin scale from a Canopy Stalker.
+     * Used in lightweight armor crafting.
+     */
+    public static final Item STALKER_SCALE = MayaanItems.register(
+            "stalker_scale",
+            props -> new Item(props.stacksTo(64)));
+
+    /**
+     * Canopy Stalker Venom Gland — rare drop from a Canopy Stalker.
+     * Used in paralytic potions and BIND glyph augments.
+     */
+    public static final Item CANOPY_STALKER_VENOM_GLAND = MayaanItems.register(
+            "canopy_stalker_venom_gland",
+            props -> new Item(props.stacksTo(16).rarity(net.mayaan.world.item.Rarity.UNCOMMON)));
+
+    /**
+     * Bloom Spore Cap — fungal cap dropped by a Bloom Walker.
+     * Used in illusion-type potions and Rootweaver faction crafting.
+     */
+    public static final Item BLOOM_SPORE_CAP = MayaanItems.register(
+            "bloom_spore_cap",
+            props -> new Item(props.stacksTo(64)));
+
+    /**
+     * Mycelial Thread — rare drop from a Bloom Walker.
+     * Used in Rootweaver crafting for binding and healing.
+     */
+    public static final Item MYCELIAL_THREAD = MayaanItems.register(
+            "mycelial_thread",
+            props -> new Item(props.stacksTo(32).rarity(net.mayaan.world.item.Rarity.UNCOMMON)));
+
+    /**
+     * Void Wing Fragment — rare drop from a Void Moth.
+     * Used in dimensional crafting (TRANSLATE glyph augments, Void Shelf access).
+     */
+    public static final Item VOID_WING_FRAGMENT = MayaanItems.register(
+            "void_wing_fragment",
+            props -> new Item(props.stacksTo(16).rarity(net.mayaan.world.item.Rarity.RARE)));
+
     /** Block item for {@link MayaanBlocks#ANIMA_CRYSTAL}. */
     public static final Item ANIMA_CRYSTAL = MayaanItems.registerBlock("anima_crystal",
             MayaanBlocks.ANIMA_CRYSTAL);

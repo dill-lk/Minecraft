@@ -1,6 +1,7 @@
 package net.mayaan.game.entity;
 
 import net.mayaan.network.chat.Component;
+import net.mayaan.server.level.ServerLevel;
 import net.mayaan.world.entity.EntityType;
 import net.mayaan.world.entity.Mob;
 import net.mayaan.world.entity.ai.attributes.AttributeSupplier;
@@ -98,16 +99,62 @@ public class StoneSerpent extends Monster {
     public void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putBoolean("PreShed", preShed);
+        output.putInt("TicksUntilShed", ticksUntilShed);
     }
 
     @Override
     public void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         this.preShed = input.getBooleanOr("PreShed", false);
+        this.ticksUntilShed = input.getIntOr("TicksUntilShed", 0);
     }
 
     @Override
     protected Component getTypeName() {
         return Component.translatable("entity.mayaan.stone_serpent");
+    }
+
+    // ── Periodic shed ─────────────────────────────────────────────────────────
+
+    /**
+     * Average ticks between shed cycles: 5 minutes at 20 ticks/sec = 6000 ticks.
+     * The actual interval varies by ±50% for naturalistic staggering.
+     */
+    private static final int SHED_INTERVAL_BASE = 6000;
+
+    /** Remaining ticks until the next shed. Initialized to a random offset on spawn. */
+    private int ticksUntilShed = 0;
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (level().isClientSide()) return;
+
+        ticksUntilShed--;
+        if (ticksUntilShed <= -SHED_INTERVAL_BASE / 2) {
+            // Initialise on first tick (ticksUntilShed == -3000 means "not set")
+            ticksUntilShed = SHED_INTERVAL_BASE / 2 + getRandom().nextInt(SHED_INTERVAL_BASE);
+        }
+
+        if (ticksUntilShed == 100) {
+            // Enter pre-shed state 5 seconds before actually shedding (for visual cue)
+            setPreShed(true);
+        }
+
+        if (ticksUntilShed <= 0) {
+            setPreShed(false);
+            if (level() instanceof ServerLevel serverLevel) {
+                // Drop a scale plate item at the serpent's position
+                net.mayaan.world.entity.item.ItemEntity drop =
+                        new net.mayaan.world.entity.item.ItemEntity(
+                                serverLevel,
+                                getX(), getY() + 0.5, getZ(),
+                                new net.mayaan.world.item.ItemStack(
+                                        net.mayaan.game.MayaanItems.SERPENT_SCALE_PLATE,
+                                        1 + getRandom().nextInt(2)));
+                serverLevel.addFreshEntity(drop);
+            }
+            ticksUntilShed = SHED_INTERVAL_BASE / 2 + getRandom().nextInt(SHED_INTERVAL_BASE);
+        }
     }
 }

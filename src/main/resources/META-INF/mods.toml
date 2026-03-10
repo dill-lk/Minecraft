@@ -1,0 +1,32 @@
+modLoader="javafml"
+loaderVersion="[51,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="mayaan"
+version="1.0.0"
+displayName="Mayaan"
+updateJSONURL=""
+displayURL="https://github.com/dill-lk/Mayaan"
+logoFile=""
+credits="Inspired by Minecraft and the modding community"
+authors="MayaanLabs"
+description='''
+The Lost World Awaits - An ancient civilization adventure mod.
+Explore the ruins of the Mayaan, an ancient civilization lost to time.
+Discover powerful glyphs, bond with constructs, and unravel the mystery of The Unraveling.
+'''
+
+[[dependencies.mayaan]]
+modId="forge"
+mandatory=true
+versionRange="[51,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.mayaan]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.21,1.22)"
+ordering="NONE"
+side="BOTH"

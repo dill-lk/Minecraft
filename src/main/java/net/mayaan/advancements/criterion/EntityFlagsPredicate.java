@@ -42,30 +42,18 @@ public record EntityFlagsPredicate(Optional<Boolean> isOnGround, Optional<Boolea
                 return false;
             }
             if (!this.isFlying.isPresent()) break block11;
-            if (!(entity instanceof LivingEntity)) ** GOTO lbl-1000
-            living = (LivingEntity)entity;
-            if (living.isFallFlying()) ** GOTO lbl-1000
-            if (living instanceof Player) {
-                player = (Player)living;
-                ** if (!player.getAbilities().flying) goto lbl-1000
+            boolean entityIsFlying;
+            if (entity instanceof LivingEntity living) {
+                if (living.isFallFlying()) {
+                    entityIsFlying = true;
+                } else if (living instanceof Player player && player.getAbilities().flying) {
+                    entityIsFlying = true;
+                } else {
+                    entityIsFlying = false;
+                }
+            } else {
+                entityIsFlying = false;
             }
-            ** GOTO lbl-1000
-lbl-1000:
-            // 2 sources
-
-            {
-                v0 = true;
-                ** GOTO lbl22
-            }
-lbl-1000:
-            // 3 sources
-
-            {
-                v0 = entityIsFlying = false;
-            }
-lbl22:
-            // 2 sources
-
             if (entityIsFlying != this.isFlying.get()) {
                 return false;
             }

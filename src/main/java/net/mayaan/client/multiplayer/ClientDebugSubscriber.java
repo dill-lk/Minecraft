@@ -303,7 +303,7 @@ public class ClientDebugSubscriber {
         }
 
         public void forEach(BiConsumer<K, V> output) {
-            this.values.forEach((? super K k, ? super V v) -> output.accept(k, v.value()));
+            this.values.forEach((k, v) -> output.accept(k, v.value()));
         }
     }
 

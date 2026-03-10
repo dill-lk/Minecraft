@@ -141,6 +141,26 @@ public final class AnimaManager {
     }
 
     /**
+     * Restores a fixed amount of Anima to the given player.
+     *
+     * <p>Unlike {@link #spend}, this succeeds only if the player's pool is not full.
+     * Returns {@code true} if at least some Anima was restored (i.e., the pool was not
+     * already at maximum), {@code false} if the pool was already full.
+     *
+     * @param playerId the player's UUID
+     * @param amount   the integer amount of Anima to restore
+     * @return {@code true} if restoration was applied; {@code false} if already full
+     */
+    public boolean restore(UUID playerId, int amount) {
+        PlayerAnimaData data = getAnimaData(playerId);
+        if (data.isFull()) {
+            return false;
+        }
+        data.regen(amount);
+        return true;
+    }
+
+    /**
      * Per-tick regen update. Call once per game tick per online player.
      *
      * <p>If {@code onLeyline} is {@code true}, uses {@link AnimaSystem#LEYLINE_REGEN_PER_TICK};

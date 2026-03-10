@@ -53,6 +53,7 @@ public final class MayaanEntities {
             "stone_serpent",
             EntityType.Builder.<StoneSerpent>of(StoneSerpent::new, MobCategory.MONSTER)
                     .sized(2.0f, 0.9f)
+                    .fireImmune()
                     .clientTrackingRange(10));
 
     /**

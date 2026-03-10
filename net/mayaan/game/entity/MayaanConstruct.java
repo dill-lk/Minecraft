@@ -1,15 +1,19 @@
 package net.mayaan.game.entity;
 
+import net.mayaan.world.InteractionHand;
+import net.mayaan.world.InteractionResult;
 import net.mayaan.world.entity.EntityType;
 import net.mayaan.world.entity.Mob;
 import net.mayaan.world.entity.ai.attributes.AttributeSupplier;
 import net.mayaan.world.entity.ai.attributes.Attributes;
 import net.mayaan.world.entity.ai.goal.FloatGoal;
 import net.mayaan.world.entity.ai.goal.LookAtPlayerGoal;
+import net.mayaan.world.entity.ai.goal.MoveTowardsTargetGoal;
 import net.mayaan.world.entity.ai.goal.RandomLookAroundGoal;
 import net.mayaan.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.mayaan.world.entity.animal.golem.AbstractGolem;
 import net.mayaan.world.entity.player.Player;
+import net.mayaan.world.item.ItemStack;
 import net.mayaan.world.level.Level;
 import net.mayaan.world.level.storage.ValueInput;
 import net.mayaan.world.level.storage.ValueOutput;
@@ -75,12 +79,69 @@ public class MayaanConstruct extends AbstractGolem {
         this.bonded = true;
     }
 
+    // ── Bonding interaction ───────────────────────────────────────────────────
+
+    /**
+     * Handles right-click interaction for bonding and repair:
+     * <ul>
+     *   <li>If the player holds a {@link net.mayaan.game.item.CoreShard} and the Construct
+     *       is not yet bonded, the Core Shard is consumed and the Construct bonds to the
+     *       player, playing the bonding sound.</li>
+     *   <li>If the Construct is already bonded and the player holds a
+     *       {@link net.mayaan.game.item.AnimaShard}, the Anima Shard is consumed and the
+     *       Construct is healed for 20 HP.</li>
+     * </ul>
+     */
+    @Override
+    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!bonded && stack.getItem() instanceof net.mayaan.game.item.CoreShard) {
+            // Bond the Construct to the player
+            bond();
+            if (!player.isCreative()) {
+                stack.shrink(1);
+            }
+            level().playSound(null, getX(), getY(), getZ(),
+                    net.mayaan.game.MayaanSounds.GLYPH_CAST_BASIC,
+                    net.mayaan.sounds.SoundSource.NEUTRAL,
+                    1.0f, 0.8f);
+            return InteractionResult.CONSUME;
+        }
+        if (bonded && stack.getItem() instanceof net.mayaan.game.item.AnimaShard) {
+            // Anima Shard repair: heal 20 HP
+            this.heal(20.0f);
+            if (!player.isCreative()) {
+                stack.shrink(1);
+            }
+            level().playSound(null, getX(), getY(), getZ(),
+                    net.mayaan.game.MayaanSounds.GLYPH_CAST_BASIC,
+                    net.mayaan.sounds.SoundSource.NEUTRAL,
+                    0.8f, 1.2f);
+            return InteractionResult.CONSUME;
+        }
+        return super.mobInteract(player, hand);
+    }
+
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0f));
-        this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 0.8));
-        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(1, new MoveTowardsTargetGoal(this, 0.9, 32.0f));
+        this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 8.0f));
+        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 0.8));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        // When bonded, keep the nearest player as the movement target so
+        // MoveTowardsTargetGoal navigates the Construct toward its companion.
+        if (bonded && !level().isClientSide()) {
+            Player nearest = level().getNearestPlayer(this, 32.0);
+            if (nearest != null) {
+                setTarget(nearest);
+            }
+        }
     }
 
     /**

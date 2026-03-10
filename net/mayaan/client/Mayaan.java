@@ -1847,6 +1847,9 @@ implements WindowEventHandler {
         while (this.options.keyAdvancements.consumeClick()) {
             this.setScreen(new AdvancementsScreen(this.player.connection.getAdvancements()));
         }
+        while (this.options.keyCodexJournal.consumeClick()) {
+            this.setScreen(new net.mayaan.client.gui.screens.CodexJournalScreen());
+        }
         while (this.options.keyQuickActions.consumeClick()) {
             this.getQuickActionsDialog().ifPresent(dialog -> this.player.connection.showDialog((Holder<Dialog>)dialog, this.screen));
         }

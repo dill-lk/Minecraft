@@ -36,8 +36,8 @@ public final class MayaanPacketSender {
 
     /**
      * How often (in server ticks) to push an anima sync packet to the client.
-     * At 20 ticks/second this is 2 syncs/second — enough for smooth bar updates
-     * without flooding the connection.
+     * At 20 ticks/second this is once every 0.5 seconds — enough for smooth bar
+     * updates without flooding the connection.
      */
     public static final int ANIMA_SYNC_INTERVAL = 10;
 

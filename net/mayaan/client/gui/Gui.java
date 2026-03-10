@@ -31,6 +31,7 @@ import net.mayaan.client.gui.components.PlayerTabOverlay;
 import net.mayaan.client.gui.components.SubtitleOverlay;
 import net.mayaan.client.gui.components.debug.DebugScreenEntries;
 import net.mayaan.client.gui.components.spectator.SpectatorGui;
+import net.mayaan.client.gui.contextualbar.AnimaBarHudRenderer;
 import net.mayaan.client.gui.contextualbar.ContextualBarRenderer;
 import net.mayaan.client.gui.contextualbar.ExperienceBarRenderer;
 import net.mayaan.client.gui.contextualbar.JumpableVehicleBarRenderer;
@@ -187,7 +188,7 @@ public class Gui {
         this.tabList = new PlayerTabOverlay(minecraft, this);
         this.bossOverlay = new BossHealthOverlay(minecraft);
         this.subtitleOverlay = new SubtitleOverlay(minecraft);
-        this.contextualInfoBarRenderers = ImmutableMap.of((Object)((Object)ContextualInfo.EMPTY), () -> ContextualBarRenderer.EMPTY, (Object)((Object)ContextualInfo.EXPERIENCE), () -> new ExperienceBarRenderer(minecraft), (Object)((Object)ContextualInfo.LOCATOR), () -> new LocatorBarRenderer(minecraft), (Object)((Object)ContextualInfo.JUMPABLE_VEHICLE), () -> new JumpableVehicleBarRenderer(minecraft));
+        this.contextualInfoBarRenderers = ImmutableMap.of((Object)((Object)ContextualInfo.EMPTY), () -> ContextualBarRenderer.EMPTY, (Object)((Object)ContextualInfo.EXPERIENCE), () -> new ExperienceBarRenderer(minecraft), (Object)((Object)ContextualInfo.LOCATOR), () -> new LocatorBarRenderer(minecraft), (Object)((Object)ContextualInfo.JUMPABLE_VEHICLE), () -> new JumpableVehicleBarRenderer(minecraft), (Object)((Object)ContextualInfo.ANIMA), () -> new AnimaBarHudRenderer(minecraft));
         this.resetTitleTimes();
     }
 
@@ -1148,17 +1149,21 @@ public class Gui {
         boolean canShowLocatorInfo = this.minecraft.player.connection.getWaypointManager().hasWaypoints();
         boolean canShowVehicleJumpInfo = this.minecraft.player.jumpableVehicle() != null;
         boolean canShowExperienceInfo = this.minecraft.gameMode.hasExperience();
+
+        // Vehicle jumping always takes priority (spatial awareness > anima pool)
+        if (canShowVehicleJumpInfo) {
+            return ContextualInfo.JUMPABLE_VEHICLE;
+        }
+        // Show the Anima bar whenever the player can take damage (survival / adventure modes)
+        if (this.minecraft.gameMode.canHurtPlayer()) {
+            return ContextualInfo.ANIMA;
+        }
+        // Fallback: locator → experience → empty (original logic for non-combat modes)
         if (canShowLocatorInfo) {
-            if (canShowVehicleJumpInfo && this.willPrioritizeJumpInfo()) {
-                return ContextualInfo.JUMPABLE_VEHICLE;
-            }
             if (canShowExperienceInfo && this.willPrioritizeExperienceInfo()) {
                 return ContextualInfo.EXPERIENCE;
             }
             return ContextualInfo.LOCATOR;
-        }
-        if (canShowVehicleJumpInfo) {
-            return ContextualInfo.JUMPABLE_VEHICLE;
         }
         if (canShowExperienceInfo) {
             return ContextualInfo.EXPERIENCE;
@@ -1170,7 +1175,8 @@ public class Gui {
         EMPTY,
         EXPERIENCE,
         LOCATOR,
-        JUMPABLE_VEHICLE;
+        JUMPABLE_VEHICLE,
+        ANIMA;
 
     }
 

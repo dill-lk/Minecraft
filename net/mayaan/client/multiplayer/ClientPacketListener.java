@@ -2347,6 +2347,21 @@ TickablePacketListener {
         this.minecraft.sendLowDiskSpaceWarning();
     }
 
+    // ── Mayaan-specific packet handlers ──────────────────────────────────────
+
+    @Override
+    public void handleMayaanAnima(net.mayaan.network.protocol.game.ClientboundMayaanAnimaPacket packet) {
+        PacketUtils.ensureRunningOnSameThread(packet, this, this.minecraft.packetProcessor());
+        net.mayaan.client.ClientMayaanData.INSTANCE.onAnimaSync(
+                packet.getCurrentAnima(), packet.getMaxAnima(), packet.isInDrought());
+    }
+
+    @Override
+    public void handleMayaanGlyphSync(net.mayaan.network.protocol.game.ClientboundMayaanGlyphSyncPacket packet) {
+        PacketUtils.ensureRunningOnSameThread(packet, this, this.minecraft.packetProcessor());
+        net.mayaan.client.ClientMayaanData.INSTANCE.onGlyphSync(packet);
+    }
+
     private void readSectionList(int chunkX, int chunkZ, LevelLightEngine lightEngine, LightLayer layer, BitSet yMask, BitSet emptyYMask, Iterator<byte[]> updates, boolean scheduleRebuild) {
         for (int sectionIndex = 0; sectionIndex < lightEngine.getLightSectionCount(); ++sectionIndex) {
             int sectionY = lightEngine.getMinLightSection() + sectionIndex;

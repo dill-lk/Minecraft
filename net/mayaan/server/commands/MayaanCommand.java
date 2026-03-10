@@ -124,6 +124,8 @@ public final class MayaanCommand {
         }
         UUID id = target.getUUID();
         GlyphMastery newMastery = GlyphKnowledgeManager.INSTANCE.awardFragments(id, glyphType, count);
+        // Sync updated glyph state to the player's client immediately
+        net.mayaan.game.MayaanPacketSender.sendGlyphSync(target);
         source.sendSuccess(() -> Component.literal(
                 "Awarded " + count + " " + glyphType.getId() + " fragments to "
                         + target.getName().getString() + " → mastery: "

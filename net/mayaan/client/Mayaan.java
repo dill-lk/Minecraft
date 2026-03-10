@@ -1974,6 +1974,8 @@ implements WindowEventHandler {
         if (this.level != null) {
             this.level.disconnect(message);
         }
+        // Reset Mayaan client cache so stale data isn't shown on the next login
+        net.mayaan.client.ClientMayaanData.INSTANCE.reset();
         if (localServer) {
             this.disconnectWithSavingScreen();
         } else {

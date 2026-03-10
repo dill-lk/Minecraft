@@ -191,6 +191,7 @@ import net.mayaan.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.mayaan.network.protocol.game.ServerboundTestInstanceBlockActionPacket;
 import net.mayaan.network.protocol.game.ServerboundUseItemOnPacket;
 import net.mayaan.network.protocol.game.ServerboundUseItemPacket;
+import net.mayaan.game.MayaanIdentifier;
 import net.mayaan.resources.Identifier;
 
 public class GamePacketTypes {
@@ -382,6 +383,16 @@ public class GamePacketTypes {
     public static final PacketType<ClientboundTickingStepPacket> CLIENTBOUND_TICKING_STEP = GamePacketTypes.createClientbound("ticking_step");
     public static final PacketType<ClientboundSetCursorItemPacket> CLIENTBOUND_SET_CURSOR_ITEM = GamePacketTypes.createClientbound("set_cursor_item");
     public static final PacketType<ClientboundSetPlayerInventoryPacket> CLIENTBOUND_SET_PLAYER_INVENTORY = GamePacketTypes.createClientbound("set_player_inventory");
+
+    // ── Mayaan-specific packets (mayaan: namespace) ───────────────────────────
+
+    /** Syncs the player's Anima pool (current, max, drought flag) to the client. */
+    public static final PacketType<ClientboundMayaanAnimaPacket> CLIENTBOUND_MAYAAN_ANIMA =
+            new PacketType<>(PacketFlow.CLIENTBOUND, MayaanIdentifier.of("mayaan_anima"));
+
+    /** Syncs the player's Glyph Knowledge score and per-type mastery tiers to the client. */
+    public static final PacketType<ClientboundMayaanGlyphSyncPacket> CLIENTBOUND_MAYAAN_GLYPH_SYNC =
+            new PacketType<>(PacketFlow.CLIENTBOUND, MayaanIdentifier.of("mayaan_glyph_sync"));
 
     private static <T extends Packet<ClientGamePacketListener>> PacketType<T> createClientbound(String id) {
         return new PacketType(PacketFlow.CLIENTBOUND, Identifier.withDefaultNamespace(id));

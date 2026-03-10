@@ -101,6 +101,9 @@ public final class MayaanServerEvents {
         if (StoryManager.INSTANCE.isNewGame(playerId)) {
             StorySpawnHandler.initializeNewPlayer(player);
         }
+
+        // Push full initial Mayaan state to the joining client
+        MayaanPacketSender.sendAll(player);
     }
 
     /**
@@ -141,6 +144,12 @@ public final class MayaanServerEvents {
 
         // ── Anima regen ───────────────────────────────────────────────────────
         AnimaManager.INSTANCE.onTick(playerId, onLeyline);
+
+        // ── Anima client sync ─────────────────────────────────────────────────
+        // Push anima state to the client every ANIMA_SYNC_INTERVAL ticks.
+        if (tick % MayaanPacketSender.ANIMA_SYNC_INTERVAL == 0) {
+            MayaanPacketSender.sendAnimaSync(player);
+        }
 
         // ── Anima Drought sound feedback ──────────────────────────────────────
         // Check once per second; play the drought-onset sound only when the

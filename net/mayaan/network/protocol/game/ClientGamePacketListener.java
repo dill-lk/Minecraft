@@ -129,6 +129,8 @@ import net.mayaan.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.mayaan.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.mayaan.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.mayaan.network.protocol.game.ClientboundUpdateRecipesPacket;
+import net.mayaan.network.protocol.game.ClientboundMayaanAnimaPacket;
+import net.mayaan.network.protocol.game.ClientboundMayaanGlyphSyncPacket;
 import net.mayaan.network.protocol.ping.ClientPongPacketListener;
 
 public interface ClientGamePacketListener
@@ -386,5 +388,13 @@ ClientPongPacketListener {
     public void handleGameTestHighlightPos(ClientboundGameTestHighlightPosPacket var1);
 
     public void handleLowDiskSpaceWarning(ClientboundLowDiskSpaceWarningPacket var1);
+
+    // ── Mayaan-specific packet handlers ──────────────────────────────────────
+
+    /** Handles a sync of the player's Anima pool state from the server. */
+    public void handleMayaanAnima(ClientboundMayaanAnimaPacket var1);
+
+    /** Handles a sync of the player's Glyph Knowledge state from the server. */
+    public void handleMayaanGlyphSync(ClientboundMayaanGlyphSyncPacket var1);
 }
 

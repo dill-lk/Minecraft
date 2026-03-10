@@ -65,7 +65,7 @@ SpriteGetter {
     }
 
     public void forEach(BiConsumer<Identifier, TextureAtlas> output) {
-        this.atlasById.forEach((? super K atlasId, ? super V entry) -> output.accept((Identifier)atlasId, entry.atlas));
+        this.atlasById.forEach((atlasId, entry) -> output.accept((Identifier)atlasId, entry.atlas));
     }
 
     public void updateMaxMipLevel(int maxMipmapLevels) {
@@ -100,7 +100,7 @@ SpriteGetter {
         ArrayList<PendingStitch> pendingStitches = new ArrayList<PendingStitch>(atlasCount);
         HashMap<Identifier, CompletableFuture<SpriteLoader.Preparations>> pendingStitchById = new HashMap<Identifier, CompletableFuture<SpriteLoader.Preparations>>(atlasCount);
         ArrayList readyForUploads = new ArrayList(atlasCount);
-        this.atlasById.forEach((? super K atlasId, ? super V atlasEntry) -> {
+        this.atlasById.forEach((atlasId, atlasEntry) -> {
             CompletableFuture<SpriteLoader.Preparations> stitchingDone = new CompletableFuture<SpriteLoader.Preparations>();
             pendingStitchById.put((Identifier)atlasId, stitchingDone);
             pendingStitches.add(new PendingStitch((AtlasEntry)atlasEntry, stitchingDone));
@@ -114,7 +114,7 @@ SpriteGetter {
     public CompletableFuture<Void> reload(PreparableReloadListener.SharedState currentReload, Executor taskExecutor, PreparableReloadListener.PreparationBarrier preparationBarrier, Executor reloadExecutor) {
         PendingStitchResults pendingStitches = currentReload.get(PENDING_STITCH);
         ResourceManager resourceManager = currentReload.resourceManager();
-        pendingStitches.pendingStitches.forEach((? super T pending) -> pending.entry.scheduleLoad(resourceManager, taskExecutor, this.maxMipmapLevels).whenComplete((value, throwable) -> {
+        pendingStitches.pendingStitches.forEach(pending -> pending.entry.scheduleLoad(resourceManager, taskExecutor, this.maxMipmapLevels).whenComplete((value, throwable) -> {
             if (value != null) {
                 pending.preparations.complete((SpriteLoader.Preparations)value);
             } else {
@@ -127,7 +127,7 @@ SpriteGetter {
     private void updateSpriteMaps(PendingStitchResults pendingStitches) {
         this.spriteLookup = pendingStitches.joinAndUpload();
         HashMap globalSpriteLookup = new HashMap();
-        this.spriteLookup.forEach((? super K id, ? super V sprite) -> {
+        this.spriteLookup.forEach((id, sprite) -> {
             TextureAtlasSprite previous;
             if (!id.texture().equals(MissingTextureAtlasSprite.getLocation()) && (previous = globalSpriteLookup.putIfAbsent(id.texture(), sprite)) != null) {
                 LOGGER.warn("Duplicate sprite {} from atlas {}, already defined in atlas {}. This will be rejected in a future version", new Object[]{id.texture(), id.atlasLocation(), previous.atlasLocation()});

@@ -71,7 +71,7 @@ public class DataComponentInitializers {
 
             @Override
             public void forEach(BiConsumer<Holder.Reference<T>, DataComponentMap> output) {
-                entries.forEach((? super T e) -> output.accept(e.element, e.components));
+                entries.forEach(e -> output.accept(e.element, e.components));
             }
 
             @Override

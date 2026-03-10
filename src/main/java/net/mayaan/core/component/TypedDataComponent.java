@@ -23,7 +23,7 @@ public record TypedDataComponent<T>(DataComponentType<T> type, T value) {
         @Override
         public TypedDataComponent<?> decode(RegistryFriendlyByteBuf input) {
             DataComponentType type = (DataComponentType)DataComponentType.STREAM_CODEC.decode(input);
-            return 1.decodeTyped(input, type);
+            return decodeTyped(input, type);
         }
 
         private static <T> TypedDataComponent<T> decodeTyped(RegistryFriendlyByteBuf input, DataComponentType<T> type) {
@@ -32,7 +32,7 @@ public record TypedDataComponent<T>(DataComponentType<T> type, T value) {
 
         @Override
         public void encode(RegistryFriendlyByteBuf output, TypedDataComponent<?> value) {
-            1.encodeCap(output, value);
+            encodeCap(output, value);
         }
 
         private static <T> void encodeCap(RegistryFriendlyByteBuf output, TypedDataComponent<T> component) {

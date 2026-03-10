@@ -1,7 +1,12 @@
 package net.mayaan.game.entity;
 
 import net.mayaan.network.chat.Component;
+import net.mayaan.server.level.ServerLevel;
+import net.mayaan.world.damagesource.DamageSource;
+import net.mayaan.world.effect.MobEffectInstance;
+import net.mayaan.world.entity.Entity;
 import net.mayaan.world.entity.EntityType;
+import net.mayaan.world.entity.LivingEntity;
 import net.mayaan.world.entity.Mob;
 import net.mayaan.world.entity.ai.attributes.AttributeSupplier;
 import net.mayaan.world.entity.ai.attributes.Attributes;
@@ -104,5 +109,29 @@ public class CanopyStalker extends Monster {
     @Override
     protected Component getTypeName() {
         return Component.translatable("entity.mayaan.canopy_stalker");
+    }
+
+    // ── Venom on hit ─────────────────────────────────────────────────────────
+
+    /**
+     * Duration (ticks) of the ANIMA_SLOW venom effect: 30 seconds = 600 ticks.
+     */
+    private static final int VENOM_DURATION_TICKS = 600;
+
+    /**
+     * Applies paralytic venom ({@link net.mayaan.game.MayaanMobEffects#ANIMA_SLOW}) to the
+     * target when a melee hit lands.
+     *
+     * <p>The venom halves the target's Anima regeneration for {@link #VENOM_DURATION_TICKS}
+     * ticks (30 seconds). Only living entities are affected.
+     */
+    @Override
+    public boolean doHurtTarget(ServerLevel level, Entity target) {
+        boolean hit = super.doHurtTarget(level, target);
+        if (hit && target instanceof LivingEntity living) {
+            living.addEffect(new MobEffectInstance(
+                    net.mayaan.game.MayaanMobEffects.ANIMA_SLOW, VENOM_DURATION_TICKS, 0, false, true));
+        }
+        return hit;
     }
 }

@@ -1,8 +1,13 @@
 package net.mayaan.game.entity;
 
 import net.mayaan.network.chat.Component;
+import net.mayaan.server.level.ServerLevel;
+import net.mayaan.world.damagesource.DamageSource;
+import net.mayaan.world.effect.MobEffectInstance;
+import net.mayaan.world.entity.Entity;
 import net.mayaan.world.entity.EntityType;
 import net.mayaan.world.entity.FlyingMob;
+import net.mayaan.world.entity.LivingEntity;
 import net.mayaan.world.entity.Mob;
 import net.mayaan.world.entity.ai.attributes.AttributeSupplier;
 import net.mayaan.world.entity.ai.attributes.Attributes;
@@ -99,5 +104,36 @@ public class VoidMoth extends FlyingMob {
     @Override
     protected Component getTypeName() {
         return Component.translatable("entity.mayaan.void_moth");
+    }
+
+    // ── Void dust on hurt ─────────────────────────────────────────────────────
+
+    /**
+     * Duration (ticks) of the {@link net.mayaan.game.MayaanMobEffects#VOID_DISORIENTATION}
+     * effect: 3 seconds = 60 ticks.
+     */
+    private static final int VOID_DUST_DURATION_TICKS = 60;
+
+    /**
+     * Overrides hurt to burst void wing dust at the attacker.
+     *
+     * <p>If the attacker is a {@link LivingEntity}, it receives the
+     * {@link net.mayaan.game.MayaanMobEffects#VOID_DISORIENTATION} effect.
+     * The Void Moth itself is marked as dust-burst-active so client-side
+     * particle rendering can display the dimensional shimmer effect.
+     */
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+        boolean hurt = super.hurtServer(level, source, damage);
+        if (hurt) {
+            setDustBurstActive(true);
+            Entity attacker = source.getEntity();
+            if (attacker instanceof LivingEntity living) {
+                living.addEffect(new MobEffectInstance(
+                        net.mayaan.game.MayaanMobEffects.VOID_DISORIENTATION,
+                        VOID_DUST_DURATION_TICKS, 0, false, true));
+            }
+        }
+        return hurt;
     }
 }

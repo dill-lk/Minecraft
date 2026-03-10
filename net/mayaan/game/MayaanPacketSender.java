@@ -1,8 +1,12 @@
 package net.mayaan.game;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import net.mayaan.game.faction.Faction;
+import net.mayaan.game.faction.FactionManager;
 import net.mayaan.game.magic.AnimaManager;
 import net.mayaan.game.magic.GlyphKnowledgeManager;
 import net.mayaan.game.magic.GlyphMastery;
@@ -11,6 +15,7 @@ import net.mayaan.game.magic.PlayerAnimaData;
 import net.mayaan.game.npc.MayaanNpcs;
 import net.mayaan.game.npc.NpcDialogue;
 import net.mayaan.network.protocol.game.ClientboundMayaanAnimaPacket;
+import net.mayaan.network.protocol.game.ClientboundMayaanFactionSyncPacket;
 import net.mayaan.network.protocol.game.ClientboundMayaanGlyphSyncPacket;
 import net.mayaan.network.protocol.game.ClientboundMayaanNpcDialoguePacket;
 import net.mayaan.server.level.ServerPlayer;
@@ -84,6 +89,22 @@ public final class MayaanPacketSender {
     public static void sendAll(ServerPlayer player) {
         sendAnimaSync(player);
         sendGlyphSync(player);
+        sendFactionSync(player);
+    }
+
+    /**
+     * Sends a {@link ClientboundMayaanFactionSyncPacket} to the given player with their
+     * current faction standing points for all four factions.
+     *
+     * @param player the target player
+     */
+    public static void sendFactionSync(ServerPlayer player) {
+        UUID id = player.getUUID();
+        Map<Faction, Integer> points = new EnumMap<>(Faction.class);
+        for (Faction faction : Faction.values()) {
+            points.put(faction, FactionManager.INSTANCE.getPoints(id, faction));
+        }
+        player.connection.send(new ClientboundMayaanFactionSyncPacket(points));
     }
 
     /**

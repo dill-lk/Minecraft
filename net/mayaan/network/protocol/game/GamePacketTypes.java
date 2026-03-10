@@ -402,6 +402,10 @@ public class GamePacketTypes {
     public static final PacketType<ServerboundMayaanCastGlyphPacket> SERVERBOUND_MAYAAN_CAST_GLYPH =
             new PacketType<>(PacketFlow.SERVERBOUND, MayaanIdentifier.of("mayaan_cast_glyph"));
 
+    /** Syncs the player's faction standing points for all four factions to the client. */
+    public static final PacketType<ClientboundMayaanFactionSyncPacket> CLIENTBOUND_MAYAAN_FACTION_SYNC =
+            new PacketType<>(PacketFlow.CLIENTBOUND, MayaanIdentifier.of("mayaan_faction_sync"));
+
     private static <T extends Packet<ClientGamePacketListener>> PacketType<T> createClientbound(String id) {
         return new PacketType(PacketFlow.CLIENTBOUND, Identifier.withDefaultNamespace(id));
     }

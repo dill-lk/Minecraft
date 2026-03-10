@@ -1,5 +1,9 @@
 package net.mayaan.client;
 
+import java.util.EnumMap;
+import java.util.Map;
+import net.mayaan.game.faction.Faction;
+import net.mayaan.game.faction.FactionStanding;
 import net.mayaan.game.magic.GlyphMastery;
 import net.mayaan.game.magic.GlyphType;
 import net.mayaan.game.magic.AnimaSystem;
@@ -40,11 +44,18 @@ public final class ClientMayaanData {
      */
     private final GlyphMastery[] masteryByType;
 
+    // ── Faction state ─────────────────────────────────────────────────────────
+
+    private final Map<Faction, Integer> factionPoints = new EnumMap<>(Faction.class);
+
     private ClientMayaanData() {
         GlyphType[] types = GlyphType.values();
         this.masteryByType = new GlyphMastery[types.length];
         for (int i = 0; i < types.length; i++) {
             masteryByType[i] = GlyphMastery.UNLEARNED;
+        }
+        for (Faction faction : Faction.values()) {
+            factionPoints.put(faction, 0);
         }
     }
 
@@ -128,5 +139,28 @@ public final class ClientMayaanData {
         for (int i = 0; i < masteryByType.length; i++) {
             masteryByType[i] = GlyphMastery.UNLEARNED;
         }
+        for (Faction faction : Faction.values()) {
+            factionPoints.put(faction, 0);
+        }
+    }
+
+    // ── Faction accessors ─────────────────────────────────────────────────────
+
+    /** Returns the raw faction point value for the given faction. */
+    public int getFactionPoints(Faction faction) {
+        return factionPoints.getOrDefault(faction, 0);
+    }
+
+    /** Returns the {@link FactionStanding} tier for the given faction. */
+    public FactionStanding getFactionStanding(Faction faction) {
+        return FactionStanding.fromPoints(getFactionPoints(faction));
+    }
+
+    /**
+     * Updates the faction point value for a single faction.
+     * Called by the packet handler when a faction-sync packet is received.
+     */
+    public void setFactionPoints(Faction faction, int points) {
+        factionPoints.put(faction, points);
     }
 }

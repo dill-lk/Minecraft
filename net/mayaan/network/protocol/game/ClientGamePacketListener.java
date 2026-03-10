@@ -400,5 +400,8 @@ ClientPongPacketListener {
 
     /** Handles opening an NPC dialogue screen with server-resolved lines. */
     public void handleMayaanNpcDialogue(ClientboundMayaanNpcDialoguePacket var1);
+
+    /** Handles a sync of the player's faction standing points from the server. */
+    public void handleMayaanFactionSync(ClientboundMayaanFactionSyncPacket var1);
 }
 

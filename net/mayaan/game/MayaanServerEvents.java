@@ -233,20 +233,28 @@ public final class MayaanServerEvents {
             return;
         }
         UUID playerId = player.getUUID();
+        boolean factionChanged = false;
 
         if (entity instanceof CanopyStalker) {
             FactionManager.INSTANCE.adjustStanding(playerId, Faction.ROOTWEAVERS, +5);
+            factionChanged = true;
         } else if (entity instanceof BloomWalker) {
             // BloomWalker kill is harmful to Rootweavers if below ACCEPTED standing
             net.mayaan.game.faction.FactionStanding standing =
                     FactionManager.INSTANCE.getStanding(playerId, Faction.ROOTWEAVERS);
-            if (standing.ordinal() < net.mayaan.game.faction.FactionStanding.ACCEPTED.ordinal()) {
+            if (!standing.isAtLeast(net.mayaan.game.faction.FactionStanding.ACCEPTED)) {
                 FactionManager.INSTANCE.adjustStanding(playerId, Faction.ROOTWEAVERS, -3);
+                factionChanged = true;
             }
         } else if (entity instanceof HollowKnight) {
             FactionManager.INSTANCE.adjustStanding(playerId, Faction.IRON_PACT, +10);
+            factionChanged = true;
             // Also attempt to complete the "defeat_hollow_knight" story goal if active
             tryCompleteGoalByKey(player, playerId, "defeat_hollow_knight");
+        }
+
+        if (factionChanged) {
+            MayaanPacketSender.sendFactionSync(player);
         }
     }
 
@@ -371,7 +379,7 @@ public final class MayaanServerEvents {
      * Fires the {@link net.mayaan.game.advancements.MayaanCriteriaTriggers#STORY_GOAL}
      * advancement criterion on completion.
      */
-    private static void tryCompleteGoalByKey(ServerPlayer player, UUID playerId, String goalKey) {
+    static void tryCompleteGoalByKey(ServerPlayer player, UUID playerId, String goalKey) {
         StoryChapter chapter = StoryManager.INSTANCE.getCurrentChapter(playerId);
         for (net.mayaan.game.story.StoryGoal goal : chapter.getGoals()) {
             if (goal.getId().equals(goalKey)) {

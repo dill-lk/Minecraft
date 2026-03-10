@@ -1,6 +1,9 @@
 package net.mayaan.game.entity;
 
 import net.mayaan.network.chat.Component;
+import net.mayaan.server.level.ServerLevel;
+import net.mayaan.world.damagesource.DamageSource;
+import net.mayaan.world.effect.MobEffectInstance;
 import net.mayaan.world.entity.EntityType;
 import net.mayaan.world.entity.Mob;
 import net.mayaan.world.entity.ai.attributes.AttributeSupplier;
@@ -12,6 +15,7 @@ import net.mayaan.world.entity.ai.goal.RandomLookAroundGoal;
 import net.mayaan.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.mayaan.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.mayaan.world.entity.monster.Monster;
+import net.mayaan.world.entity.player.Player;
 import net.mayaan.world.level.Level;
 import net.mayaan.world.level.storage.ValueInput;
 import net.mayaan.world.level.storage.ValueOutput;
@@ -110,5 +114,60 @@ public class BloomWalker extends Monster {
     @Override
     protected Component getTypeName() {
         return Component.translatable("entity.mayaan.bloom_walker");
+    }
+
+    // ── Spore on hurt / death ─────────────────────────────────────────────────
+
+    /**
+     * Radius (blocks) of the spore cloud released when the Bloom Walker is hurt.
+     * The cloud lingers for {@link #SPORE_DURATION_TICKS} ticks.
+     */
+    private static final double SPORE_RADIUS = 4.0;
+
+    /**
+     * Duration (ticks) of the {@link net.mayaan.game.MayaanMobEffects#BLOOM_HAZE} effect
+     * applied when a player walks through a spore cloud: 8 seconds = 160 ticks.
+     */
+    private static final int SPORE_DURATION_TICKS = 160;
+
+    /**
+     * Duration of the extended death spore cloud: 12 seconds = 240 ticks.
+     */
+    private static final int DEATH_SPORE_DURATION_TICKS = 240;
+
+    /**
+     * Overrides hurt to trigger a spore cloud centred on this Bloom Walker.
+     *
+     * <p>Any {@link Player} within {@link #SPORE_RADIUS} blocks receives the
+     * {@link net.mayaan.game.MayaanMobEffects#BLOOM_HAZE} effect.
+     */
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+        boolean hurt = super.hurtServer(level, source, damage);
+        if (hurt) {
+            setSporingActive(true);
+            releaseSporeBurst(level, SPORE_DURATION_TICKS);
+        }
+        return hurt;
+    }
+
+    /**
+     * On death, releases a larger spore burst affecting a wider area.
+     */
+    @Override
+    public void die(DamageSource cause) {
+        super.die(cause);
+        if (!level().isClientSide() && level() instanceof ServerLevel serverLevel) {
+            setSporingActive(true);
+            releaseSporeBurst(serverLevel, DEATH_SPORE_DURATION_TICKS);
+        }
+    }
+
+    private void releaseSporeBurst(ServerLevel level, int durationTicks) {
+        for (Player player : level.getEntitiesOfClass(Player.class,
+                getBoundingBox().inflate(SPORE_RADIUS))) {
+            player.addEffect(new MobEffectInstance(
+                    net.mayaan.game.MayaanMobEffects.BLOOM_HAZE, durationTicks, 0, false, true));
+        }
     }
 }

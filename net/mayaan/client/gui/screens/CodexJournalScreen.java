@@ -161,6 +161,26 @@ public final class CodexJournalScreen extends Screen {
         int droughtColour = ClientMayaanData.INSTANCE.isInDrought() ? 0xFFE0853D : 0xFF8AE090;
         graphics.drawString(this.font, droughtStatus,
                 panelLeft + 10 + this.font.width(animaLine) + 20, y, droughtColour, false);
+        y += this.font.lineHeight + 10;
+
+        // ── Faction section ───────────────────────────────────────────────────
+        graphics.fill(panelLeft + 6, y, panelRight - 6, y + 1, BORDER_COLOUR);
+        y += 8;
+        graphics.drawString(this.font, "FACTION STANDINGS", panelLeft + 10, y, SECTION_HEADER_COLOUR, false);
+        y += this.font.lineHeight + 6;
+
+        for (net.mayaan.game.faction.Faction faction : net.mayaan.game.faction.Faction.values()) {
+            net.mayaan.game.faction.FactionStanding standing =
+                    ClientMayaanData.INSTANCE.getFactionStanding(faction);
+            int pts = ClientMayaanData.INSTANCE.getFactionPoints(faction);
+            int standingColour = factionStandingColour(standing);
+            String factionLabel = formatId(faction.getId());
+            String standingLabel = formatId(standing.getId()) + " (" + pts + ")";
+            graphics.drawString(this.font, factionLabel, panelLeft + 10, y, TEXT_COLOUR, false);
+            graphics.drawString(this.font, standingLabel,
+                    panelLeft + 100, y, standingColour, false);
+            y += this.font.lineHeight + 3;
+        }
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }
@@ -171,6 +191,27 @@ public final class CodexJournalScreen extends Screen {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Formats a snake_case ID into a display-ready string:
+     * replaces underscores with spaces and converts to uppercase.
+     * Example: {@code "iron_pact"} → {@code "IRON PACT"}.
+     */
+    private static String formatId(String id) {
+        return id.replace('_', ' ').toUpperCase();
+    }
+
+    private static int factionStandingColour(net.mayaan.game.faction.FactionStanding standing) {
+        return switch (standing) {
+            case EXALTED -> 0xFFFFD700;
+            case HONORED -> 0xFF5AFFE0;
+            case TRUSTED -> 0xFF88CCFF;
+            case ACCEPTED -> 0xFF88E890;
+            case NEUTRAL -> 0xFFCCCCCC;
+            case WARY -> 0xFFE0A050;
+            case HOSTILE -> 0xFFFF5060;
+        };
+    }
 
     private static int pipColourFor(GlyphMastery mastery) {
         return switch (mastery) {

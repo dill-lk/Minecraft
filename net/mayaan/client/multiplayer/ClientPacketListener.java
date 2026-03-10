@@ -2368,6 +2368,14 @@ TickablePacketListener {
         this.minecraft.setScreen(new net.mayaan.client.gui.screens.NpcDialogueScreen(packet));
     }
 
+    @Override
+    public void handleMayaanFactionSync(net.mayaan.network.protocol.game.ClientboundMayaanFactionSyncPacket packet) {
+        PacketUtils.ensureRunningOnSameThread(packet, this, this.minecraft.packetProcessor());
+        for (net.mayaan.game.faction.Faction faction : net.mayaan.game.faction.Faction.values()) {
+            net.mayaan.client.ClientMayaanData.INSTANCE.setFactionPoints(faction, packet.getPoints(faction));
+        }
+    }
+
     private void readSectionList(int chunkX, int chunkZ, LevelLightEngine lightEngine, LightLayer layer, BitSet yMask, BitSet emptyYMask, Iterator<byte[]> updates, boolean scheduleRebuild) {
         for (int sectionIndex = 0; sectionIndex < lightEngine.getLightSectionCount(); ++sectionIndex) {
             int sectionY = lightEngine.getMinLightSection() + sectionIndex;

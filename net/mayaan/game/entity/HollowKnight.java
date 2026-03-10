@@ -131,4 +131,42 @@ public class HollowKnight extends Monster {
     protected Component getTypeName() {
         return Component.translatable("entity.mayaan.hollow_knight");
     }
+
+    // ── Anima drain tick logic ────────────────────────────────────────────────
+
+    /**
+     * Tries to drain Anima from a nearby player every {@code DRAIN_COOLDOWN_TICKS} ticks.
+     *
+     * <p>If a player is within {@link #DRAIN_RANGE} blocks and the drain is off cooldown,
+     * the Hollow Knight enters the draining-active state, spends {@link #DRAIN_ANIMA_COST}
+     * from the nearest player's pool via {@link net.mayaan.game.magic.AnimaManager}, and
+     * heals itself for half the drained amount.
+     */
+    private static final int DRAIN_COOLDOWN_TICKS = 40;
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (level().isClientSide()) {
+            return;
+        }
+        if (drainCooldown > 0) {
+            drainCooldown--;
+            drainingActive = false;
+            return;
+        }
+        // Attempt to find a nearby player to drain
+        Player nearest = level().getNearestPlayer(this, DRAIN_RANGE);
+        if (nearest instanceof net.mayaan.server.level.ServerPlayer serverPlayer) {
+            net.mayaan.game.magic.AnimaManager.INSTANCE.spend(serverPlayer.getUUID(), DRAIN_ANIMA_COST);
+            // Heal the Hollow Knight for half the drained amount
+            this.heal(DRAIN_ANIMA_COST * 0.5f);
+            drainingActive = true;
+            drainCooldown = DRAIN_COOLDOWN_TICKS;
+            // Sync anima to the affected player's client
+            net.mayaan.game.MayaanPacketSender.sendAnimaSync(serverPlayer);
+        } else {
+            drainingActive = false;
+        }
+    }
 }
